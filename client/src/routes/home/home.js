@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 function Home() {
   const [actived, setActived] = useState('');
   const [searchString, setSearchString] = useState('');
-  const [banner, setBanner] = useState('');
+  const [banners] = useState([
+    '../../images/test.jpg',
+    '../../images/test.jpg',
+    '../../images/test.jpg',
+    '../../images/test.jpg',
+    '../../images/test.jpg',
+  ]);
 
   const SearchSubmit = (event) => {
     event.preventDefault(); 
@@ -115,18 +121,20 @@ function Home() {
       </div>
       <div className='body_home'>
         <div className='recommend'>
-          <img src={banner}></img>
-          <img src={banner}></img>
-          <img src={banner}></img>
-          <img src={banner}></img>
-          <img src={banner}></img>
+        {banners.map((banner, index) => (
+            <img key={index} src={banner} alt={`Banner ${index + 1}`} />
+          ))}
         </div>
         <div className='main-page'>
           <div className='main-movie'>
-            <div className='hot'></div>
+            <div className='hot'>
+
+            </div>
             <div className='new-movie'></div>
           </div>
-          <aside className='bxh'></aside>
+          <aside className='bxh'>
+            <h1>Bảng xếp hạng</h1>
+          </aside>
         </div>
       </div>
     </div>

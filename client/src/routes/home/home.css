@@ -198,13 +198,19 @@ li:hover::after,
     height: 50vh;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
     padding: 30px;
     gap: 1.8em;
+    overflow: hidden;
 }
+
 .body_home .recommend img {
-    width: 100%;
+    width: 100%;     
     height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block; 
+    overflow: hidden;
 }
 
 .body_home .main-page {
@@ -223,7 +229,14 @@ li:hover::after,
 }
 
 .main-page aside {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 30%;
     height: 100%;
     border: 1px solid green;
+}
+
+h1 {
+    color: #fff;
 }
