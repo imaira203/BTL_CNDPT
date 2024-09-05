@@ -3,13 +3,20 @@ import './home.css';
 function Home() {
   return (
     <div className="main">
-        <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+        
        <div className="header">
-             <a href="home" className="logo">
-             <i className='bx bxs-movie'>free fire</i>
+             <a href="/" className="logo">
+             <i className='bx bxs-movie'>Dinhprovip</i>
              </a>
-
-             <div className ="bx bx-menu" id="menue-icon"></div>
+             <div className ='bx bx-menu' id='menu-icon'></div>
+             
+             <ul className='navbar'>
+              <li><a href='#home' className='active'>Home</a></li>
+              <li><a href='#movie'>Movie</a></li>
+              <li><a href='#coming'>Coming</a></li>
+              <li><a href='#newsletter'>Newsletter</a></li>
+             </ul>
+             <a href='#' className='btn'>Sign In</a>
        </div>
     </div>
   );
