@@ -11,49 +11,65 @@ app.use(bodyParser.json());
 
 const supabaseUrl = 'https://unxjcplzfnrpncotttrm.supabase.co/'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVueGpjcGx6Zm5ycG5jb3R0dHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU1NDM1NTAsImV4cCI6MjA0MTExOTU1MH0.w0VhcQHunOIVVh_CZvE8i5nEih-Y4htqHn_S3tnXtyA'
-const supabase = createClient(supabaseUrl, supabaseKey)
+const db = createClient(supabaseUrl, supabaseKey);
 
-if (supabase){
-    console.log('Connected to DB!');
+if (db) {
+    console.log('Connected to Supabase DB!');
 } else {
-    console.log("Error connecting to DB");
+    console.log("Error connecting to Supabase DB");
 }
 
-// Register new user
-app.post('/register', (req, res) => {
-    const { username, password, name } = req.body;
-    const query = 'INSERT INTO accounts (username, password) VALUES (?, ?)';
-    db.query(query, [username, password], (err, result) => {
-        if (err) return res.status(500).send(err);
+app.post('/register', async (req, res) => {
+    const { username, password, name, email } = req.body;
 
-        const accountId = result.insertId;
-        const userQuery = 'INSERT INTO user (account_id, name) VALUES (?, ?)';
-        db.query(userQuery, [accountId, name], (err, result) => {
-            if (err) return res.status(500).send(err);
-            res.status(200).send(`User registered with username: ${name}`);
-        });
-    });
+    try {
+        const { data: accountData, error: accountError } = await db
+            .from('accounts')
+            .insert([{ username, password, name, email }])
+            .select();
+
+        if (accountError) {
+            return res.status(500).json({ error: accountError.message });
+        }
+        res.status(200).json({ message: 'User registered successfully', data: accountData });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// User login
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    const query = 'SELECT * FROM accounts WHERE username = ? AND password = ?';
-    db.query(query, [username, password], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        
-        if (results.length > 0) {
-            const token = 'abcdefghiklmnoupw12345'; 
+
+    try {
+        const { data: accounts, error } = await db
+            .from('accounts')
+            .select('*')
+            .eq('username', username)
+            .eq('password', password);
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        if (accounts.length > 0) {
+            const account = accounts[0];
+            const token = 'abcdefghiklmnoupw12345';
+
             res.status(200).json({
-                message: 'Login successful',
-                token: token, 
-                username: results[0].username,
-                account_id: results[0].id
+                message: 'User logged successfully',
+                data: {
+                    id: account.id, 
+                    username: account.username,
+                    name: account.name,
+                    email: account.email
+                }
             });
         } else {
             res.status(401).json({ message: 'Invalid credentials' });
         }
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 const port = 81;
