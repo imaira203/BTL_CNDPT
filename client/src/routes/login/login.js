@@ -16,6 +16,11 @@ function Login() {
     document.title = 'PhimHay - Đăng nhập';
   }, []);
 
+  const onUpdating = () => {
+    setPopupMessage('Chức năng đang được cập nhật');
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 2000);
+  }
 
   const togglePasswordVisibility = () => {
     setShowPass(!showPass);
@@ -49,7 +54,7 @@ function Login() {
         setTimeout(() => {
           setShowPopup(false);
           navigate('/');
-        }, 1000); 
+        }, 2000); 
       } else {
         setPopupMessage('Đăng nhập thất bại, vui lòng kiểm tra lại tài khoản và mật khẩu');
         setShowPopup(true);
@@ -115,7 +120,7 @@ function Login() {
           <div className='remember'>
             <input type='checkbox' /> Ghi nhớ đăng nhập
             <div className='forgot-password'>
-                <a href='/'>Quên mật khẩu?</a>
+                <p onClick={onUpdating}>Quên mật khẩu?</p>
             </div>
           </div>
 

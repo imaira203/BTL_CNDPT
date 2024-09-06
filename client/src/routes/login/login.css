@@ -80,14 +80,15 @@ input.password {
 }
 
 .register p, a,
-.forgot-password a{
+.forgot-password p{
     text-decoration: none;
     color: #fff;
+    cursor: pointer;
 }
 
 
 .register .register-btn:hover,
-.forgot-password a:hover {
+.forgot-password p:hover {
     font-weight: bold;
     color: rgb(194, 227, 255);
     transition: font-weight 0.3s ease;
