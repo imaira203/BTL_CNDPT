@@ -64,6 +64,11 @@ function Login() {
 
   return (
     <div className="main">
+        <div className="header">
+        <a href="/" className="logo">
+          <i className='bx bxs-movie'>PhimHay</i>
+        </a>
+      </div>
       <div className="login-container">
         <div className="form-login">
           <h1>Đăng nhập</h1>
