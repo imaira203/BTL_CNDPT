@@ -3,6 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
+
+function generateToken() {
+    return crypto.randomBytes(32).toString('hex');
+  }
 
 
 const app = express();
@@ -19,17 +24,17 @@ if (db) {
     console.log("Error connecting to Supabase DB");
 }
 
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
     const { username, password, name, email } = req.body;
-
+    const token = generateToken();
     try {
         const { data: accountData, error: accountError } = await db
             .from('accounts')
-            .insert([{ username, password, name, email }])
+            .insert([{ username, password, name, email, token }])
             .select();
 
         if (accountError) {
-            return res.status(500).json({ error: accountError.message });
+            return res.status(500).json({message: 'Username was already taken', error: accountError.message });
         }
         res.status(200).json({ message: 'User registered successfully', data: accountData });
     } catch (err) {
@@ -37,9 +42,8 @@ app.post('/register', async (req, res) => {
     }
 });
 
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-
     try {
         const { data: accounts, error } = await db
             .from('accounts')
@@ -53,11 +57,10 @@ app.post('/login', async (req, res) => {
 
         if (accounts.length > 0) {
             const account = accounts[0];
-            const token = 'abcdefghiklmnoupw12345';
-
             res.status(200).json({
                 message: 'User logged successfully',
                 data: {
+                    token: account.token,
                     id: account.id, 
                     username: account.username,
                     name: account.name,
@@ -71,6 +74,8 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+app.get('api/get-video')
 
 const port = 81;
 app.listen(port, () => {
