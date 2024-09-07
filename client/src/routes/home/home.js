@@ -5,14 +5,8 @@ import VideoContent from '../../components/VideoContent'; // Import VideoContent
 function Home() {
   const [actived, setActived] = useState('');
   const [searchString, setSearchString] = useState('');
-  const [banners] = useState([
-    '../../images/test.jpg',
-    '../../images/test.jpg',
-    '../../images/test.jpg',
-    '../../images/test.jpg',
-    '../../images/test.jpg',
-  ]);
-  
+
+  const [recommendMovies, setRecommendMovies] = useState([]);
   const [topMovies, setTopMovies] = useState([]);
   const [latestMovies, setLatestMovies] = useState([]);
 
@@ -72,6 +66,25 @@ function Home() {
   }, [actived]);
 
   useEffect(() => {
+    const fetchRecommend = async () => {
+      try {
+        const response = await fetch('http://localhost:81/api/getRecommend');
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+        }
+        const data = await response.json();
+        console.log(data)
+        setRecommendMovies(data.data);
+      } catch (error) {
+        console.error('Error fetching recommend:', error);
+        setError(error.message);
+      }
+    };
+    fetchRecommend();
+  }, []);
+
+  useEffect(() => {
     const fetchMovies = async () => {
       try {
         const topMoviesResponse = await fetch('http://localhost:81/api/top-movies');
@@ -88,13 +101,12 @@ function Home() {
           throw new Error(`HTTP error! Status: ${latestMoviesResponse.status}, Message: ${errorText}`);
         }
         const latestMoviesData = await latestMoviesResponse.json();
-        setLatestMovies(latestMoviesData.data.all); // Adjust based on actual data structure
+        setLatestMovies(latestMoviesData.data.all); 
       } catch (error) {
         console.error('Error fetching movies:', error);
         setError(error.message);
       }
     };
-
     fetchMovies();
   }, []);
 
@@ -176,9 +188,9 @@ function Home() {
       </div>
       <div className='body_home'>
         <div className='recommend'>
-          {banners.map((banner, index) => (
-              <img key={index} src={banner} alt={`Banner ${index + 1}`} />
-            ))}
+          {recommendMovies.map((movie) => (
+            <img key={movie.id} src={movie.thumbnail} alt={movie.name} />
+          ))}
         </div>
         <div className='main-page'>
           <div className='main-movie'>
@@ -204,12 +216,13 @@ function Home() {
               </div>
             </div>
             <div className='new-movie-container'>
-              {latestMovies
-                .filter(movie => selectedType === 'all' || (selectedType === 'single' && movie.theloai === 'Phim lẻ') || (selectedType === 'series' && movie.theloai === 'Phim bộ'))
-                .map((movie) => (
-                  <VideoContent key={movie.id} movie={movie} />
-                ))}
-            </div>
+            {latestMovies
+              .filter(movie => selectedType === 'all' || (selectedType === 'single' && movie.theloai === 'Phim lẻ') || (selectedType === 'series' && movie.theloai === 'Phim bộ'))
+              .slice(0, 10)
+              .map((movie) => (
+                <VideoContent key={movie.id} movie={movie} />
+              ))}
+          </div>
           </div>
           <aside className='bxh'>
             <h1>Bảng xếp hạng</h1>

@@ -204,13 +204,30 @@ app.get('/api/category/:categoryName', async (req, res) => {
     }
 });
 
+app.get('/api/getRecommend', async (req, res) => {
+    try {
+        const { data: movies, error } = await db
+            .from('recommend')
+            .select('*')
+            .order('id', { ascending: false })
+            .limit(5);
+
+        if (error) {
+            throw error;
+        }
+        res.status(200).json({ data: movies });
+    } catch (error) {
+        console.error('Error fetching recommended movies:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.get('/api/latest-movies', async (req, res) => {
     try {
         const { data: movies, error } = await db
             .from('movies')
             .select('*')
             .order('last_updated', { ascending: false })
-            .limit(10);
 
         if (error) {
             throw error;
