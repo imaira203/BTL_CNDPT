@@ -15,7 +15,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "cross-env PORT=80 react-scripts start",
+    "ubuntu": "cross-env PORT=80 react-scripts start",
+    "start-ubuntu": "sudo npm ubuntu",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
