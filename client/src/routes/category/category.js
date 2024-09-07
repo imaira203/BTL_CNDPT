@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import './category.css'
-
 const API_URL = process.env.REACT_APP_API_URL;
 
 function Category() {
@@ -12,7 +11,7 @@ function Category() {
     useEffect(() => {
       const fetchMovies = async () => {
         try {
-          const response = await fetch(`${API_URL}/api/category/${categoryName}`);
+          const response = await fetch(`${API_URL}/category/${categoryName}`);
           if (!response.ok) {
             const errorText = await response.text(); 
             throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);

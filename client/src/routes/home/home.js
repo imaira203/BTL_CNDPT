@@ -1,8 +1,8 @@
 import './home.css';
 import { useEffect, useState } from 'react';
 import VideoContent from '../../components/VideoContent'; // Import VideoContent
-
 const API_URL = process.env.REACT_APP_API_URL;
+
 
 function Home() {
   const [actived, setActived] = useState('');
@@ -70,7 +70,7 @@ function Home() {
   useEffect(() => {
     const fetchRecommend = async () => {
       try {
-        const response = await fetch(`/api/getRecommend`);
+        const response = await fetch(`${API_URL}/getRecommend`);
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
@@ -89,7 +89,7 @@ function Home() {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const topMoviesResponse = await fetch(`/api/top-movies`);
+        const topMoviesResponse = await fetch(`${API_URL}/top-movies`);
         if (!topMoviesResponse.ok) {
           const errorText = await topMoviesResponse.text();
           throw new Error(`HTTP error! Status: ${topMoviesResponse.status}, Message: ${errorText}`);
@@ -97,7 +97,7 @@ function Home() {
         const topMoviesData = await topMoviesResponse.json();
         setTopMovies(topMoviesData.data);
 
-        const latestMoviesResponse = await fetch(`/api/latest-movies`);
+        const latestMoviesResponse = await fetch(`${API_URL}/latest-movies`);
         if (!latestMoviesResponse.ok) {
           const errorText = await latestMoviesResponse.text();
           throw new Error(`HTTP error! Status: ${latestMoviesResponse.status}, Message: ${errorText}`);

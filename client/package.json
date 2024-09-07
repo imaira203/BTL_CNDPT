@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "boxicons": "^2.1.4",
     "crypto": "^1.0.1",
+    "http-proxy-middleware": "^3.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1",
@@ -15,9 +16,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "cross-env PORT=80 react-scripts start",
-    "ubuntu": "cross-env PORT=80 react-scripts start",
-    "start-ubuntu": "sudo npm ubuntu",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
