@@ -70,7 +70,7 @@ function Home() {
   useEffect(() => {
     const fetchRecommend = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/getRecommend`);
+        const response = await fetch(`/api/getRecommend`);
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
@@ -89,7 +89,7 @@ function Home() {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const topMoviesResponse = await fetch(`${API_URL}/api/top-movies`);
+        const topMoviesResponse = await fetch(`/api/top-movies`);
         if (!topMoviesResponse.ok) {
           const errorText = await topMoviesResponse.text();
           throw new Error(`HTTP error! Status: ${topMoviesResponse.status}, Message: ${errorText}`);
@@ -97,7 +97,7 @@ function Home() {
         const topMoviesData = await topMoviesResponse.json();
         setTopMovies(topMoviesData.data);
 
-        const latestMoviesResponse = await fetch(`${API_URL}/api/latest-movies`);
+        const latestMoviesResponse = await fetch(`/api/latest-movies`);
         if (!latestMoviesResponse.ok) {
           const errorText = await latestMoviesResponse.text();
           throw new Error(`HTTP error! Status: ${latestMoviesResponse.status}, Message: ${errorText}`);
