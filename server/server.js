@@ -153,6 +153,58 @@ app.get('/api/category/:categoryName', async (req, res) => {
     }
   });  
 
+  app.get('/api/top-movies', async (req, res) => {
+    try {
+        // Fetch all movies
+        const { data: movies, error } = await db
+            .from('movies')
+            .select('*');
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Aggregate views
+        const movieViews = movies.map(movie => {
+            let totalViews = 0;
+
+            try {
+                let chapters;
+                if (typeof movie.chapter === 'string') {
+                    chapters = JSON.parse(movie.chapter);
+                } else if (Array.isArray(movie.chapter)) {
+                    chapters = movie.chapter;
+                } else {
+                    throw new Error('Unexpected chapter format');
+                }
+
+                totalViews = chapters.reduce((sum, chapter) => sum + parseInt(chapter.views, 10), 0);
+            } catch (e) {
+                console.error(`Failed to parse chapter field for movie ID ${movie.id}:`, e);
+                return {
+                    ...movie,
+                    totalViews: 0
+                };
+            }
+
+            return {
+                ...movie,
+                totalViews
+            };
+        });
+
+        const sortedMovies = movieViews.sort((a, b) => b.totalViews - a.totalViews);
+
+        const topMovies = sortedMovies.slice(0, 5);
+
+        res.status(200).json({ data: topMovies });
+    } catch (err) {
+        console.error('Server error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 const port = 81;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

@@ -12,6 +12,9 @@ function Home() {
     '../../images/test.jpg',
   ]);
 
+  const [topMovies, setTopMovies] = useState([]);
+  const [error, setError] = useState(null);
+
   const genres = [
     { name: 'Hành động', path: 'action' },
     { name: 'Drama', path: 'drama' },
@@ -37,7 +40,6 @@ function Home() {
     { name: 'Thái Lan', path: 'thailand' },
     { name: 'Ấn Độ', path: 'india' }
   ];
-  
 
   const SearchSubmit = (event) => {
     event.preventDefault(); 
@@ -60,6 +62,32 @@ function Home() {
       localStorage.setItem('active', actived);
     }
   }, [actived]);
+
+  useEffect(() => {
+    const fetchTopMovies = async () => {
+      try {
+        const response = await fetch('http://localhost:81/api/top-movies');
+        if (!response.ok) {
+          const errorText = await response.text(); 
+          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text(); 
+          throw new Error(`Expected JSON response, got: ${text}`);
+        }
+
+        const data = await response.json();
+        setTopMovies(data.data);
+      } catch (error) {
+        console.error('Error fetching top movies:', error);
+        setError(error.message);
+      }
+    };
+
+    fetchTopMovies();
+  }, []);
 
   const handleNavClick = (page) => {
     setActived(page);
@@ -152,66 +180,21 @@ function Home() {
           <aside className='bxh'>
             <h1>Bảng xếp hạng</h1>
             <div className='bxh-content'>
-              <div className='child-content'>
-                <div className='img'>
-                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
-                </div>
-                <div className='content-container'>
-                  <div className='title'>abc</div>
-                  <div className='year'>2024</div>
-                  <div className='icon'>
-                    <i className='bx bx-bar-chart-alt' >124485</i>
+              {error && <p>Error: {error}</p>}
+              {topMovies.map(movie => (
+                <div className='child-content' key={movie.id}>
+                  <div className='img'>
+                    <img alt={movie.name} src={movie.thumbnail_image} />
+                  </div>
+                  <div className='content-container'>
+                    <div className='title'>{movie.name}</div>
+                    <div className='year'>{movie.release_year}</div>
+                    <div className='icon'>
+                      <i className='bx bx-bar-chart-alt'>{movie.totalViews}</i>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className='child-content'>
-                <div className='img'>
-                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
-                </div>
-                <div className='content-container'>
-                  <div className='title'>Mo</div>
-                  <div className='year'>2024</div>
-                  <div className='icon'>
-                    <i className='bx bx-bar-chart-alt' >124485</i>
-                  </div>
-                </div>
-              </div>
-              <div className='child-content'>
-                <div className='img'>
-                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
-                </div>
-                <div className='content-container'>
-                  <div className='title'>abc</div>
-                  <div className='year'>2024</div>
-                  <div className='icon'>
-                    <i className='bx bx-bar-chart-alt' >124485</i>
-                  </div>
-                </div>
-              </div>
-              <div className='child-content'>
-                <div className='img'>
-                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
-                </div>
-                <div className='content-container'>
-                  <div className='title'>abc</div>
-                  <div className='year'>2024</div>
-                  <div className='icon'>
-                    <i className='bx bx-bar-chart-alt' >124485</i>
-                  </div>
-                </div>
-              </div>
-              <div className='child-content'>
-                <div className='img'>
-                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
-                </div>
-                <div className='content-container'>
-                  <div className='title'>abc</div>
-                  <div className='year'>2024</div>
-                  <div className='icon'>
-                    <i className='bx bx-bar-chart-alt' >124485</i>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </aside>
         </div>
