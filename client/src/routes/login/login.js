@@ -2,6 +2,8 @@ import './login.css';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -35,7 +37,7 @@ function Login() {
     };
 
     try {
-      const response = await fetch('http://localhost:81/api/login', {
+      const response = await fetch(`${API_URL}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
