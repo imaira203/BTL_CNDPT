@@ -15,9 +15,15 @@
     display: flex;
     flex-direction: column;
     background:#101529;
-    height: 100vh;
+    height: max-content;
     width: 100%;
+    overflow: auto;
 }
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
 .header{
     position: fixed;
     width: 100%;
@@ -234,9 +240,75 @@ li:hover::after,
     align-items: center;
     width: 30%;
     height: 100%;
-    border: 1px solid green;
+    border: 1px solid rgb(250, 250, 250);
+    z-index: 100000;
+    border-radius: 5px;
 }
 
 h1 {
     color: #fff;
+}
+
+.bxh-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 0.8em;
+    color: #fff;
+}
+
+.top-view,
+.top-rating,
+.top-like {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 3em;
+}
+.bxh-content{
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    justify-content: left;
+    row-gap: 0.5em;
+}
+.child-content .img img {
+    height: 100%;
+    width: 6em;
+    border-radius: 5px;
+}
+
+.child-content {
+    display: flex;
+    flex-direction: row;
+    background-color: hsla(180, 1%, 72%, 0.682);
+    height: 110px;
+    border-radius: 5px;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.content-container .title {
+    font-size: 24px;
+    font-weight: 400;
+    font-weight: bolder;
+}
+
+.bx.bx-bar-chart-alt{
+    color: #fff
+}
+.content-container .year {
+   padding-left: 30px;
+   font-weight: 400;
+   font-size: 1em;
+}
+.content-container .title {
+    color: aliceblue;
+    padding-left: 10px;
+    font-weight: 700;
 }

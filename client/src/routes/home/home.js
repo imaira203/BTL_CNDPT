@@ -127,13 +127,74 @@ function Home() {
         </div>
         <div className='main-page'>
           <div className='main-movie'>
-            <div className='hot'>
-
+            <div className='new-movie'>
+              cái này là phim mới
             </div>
-            <div className='new-movie'></div>
           </div>
           <aside className='bxh'>
             <h1>Bảng xếp hạng</h1>
+            <div className='bxh-content'>
+              <div className='child-content'>
+                <div className='img'>
+                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                </div>
+                <div className='content-container'>
+                  <div className='title'>abc</div>
+                  <div className='year'>2024</div>
+                  <div className='icon'>
+                    <i class='bx bx-bar-chart-alt' >124485</i>
+                  </div>
+                </div>
+              </div>
+              <div className='child-content'>
+                <div className='img'>
+                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                </div>
+                <div className='content-container'>
+                  <div className='title'>Mo</div>
+                  <div className='year'>2024</div>
+                  <div className='icon'>
+                    <i className='bx bx-bar-chart-alt' >124485</i>
+                  </div>
+                </div>
+              </div>
+              <div className='child-content'>
+                <div className='img'>
+                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                </div>
+                <div className='content-container'>
+                  <div className='title'>abc</div>
+                  <div className='year'>2024</div>
+                  <div className='icon'>
+                    <i class='bx bx-bar-chart-alt' >124485</i>
+                  </div>
+                </div>
+              </div>
+              <div className='child-content'>
+                <div className='img'>
+                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                </div>
+                <div className='content-container'>
+                  <div className='title'>abc</div>
+                  <div className='year'>2024</div>
+                  <div className='icon'>
+                    <i class='bx bx-bar-chart-alt' >124485</i>
+                  </div>
+                </div>
+              </div>
+              <div className='child-content'>
+                <div className='img'>
+                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                </div>
+                <div className='content-container'>
+                  <div className='title'>abc</div>
+                  <div className='year'>2024</div>
+                  <div className='icon'>
+                    <i class='bx bx-bar-chart-alt' >124485</i>
+                  </div>
+                </div>
+              </div>
+            </div>
           </aside>
         </div>
       </div>
