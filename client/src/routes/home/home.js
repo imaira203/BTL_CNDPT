@@ -1,5 +1,5 @@
 import './home.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function Home() {
   const [actived, setActived] = useState('');
@@ -14,6 +14,8 @@ function Home() {
 
   const [topMovies, setTopMovies] = useState([]);
   const [error, setError] = useState(null);
+  const [selectedType, setSelectedType] = useState('all');
+
 
   const genres = [
     { name: 'Hành động', path: 'action' },
@@ -40,6 +42,10 @@ function Home() {
     { name: 'Thái Lan', path: 'thailand' },
     { name: 'Ấn Độ', path: 'india' }
   ];
+
+  const handleTypeClick = (type) => {
+    setSelectedType(type);
+  };
 
   const SearchSubmit = (event) => {
     event.preventDefault(); 
@@ -91,6 +97,13 @@ function Home() {
 
   const handleNavClick = (page) => {
     setActived(page);
+  };
+
+  const movieTitlesRefs = useRef([]);
+
+  const checkMarquee = (index) => {
+    const titleElement = movieTitlesRefs.current[index];
+    return titleElement && titleElement.scrollWidth > titleElement.clientWidth;
   };
 
   return (
@@ -167,31 +180,73 @@ function Home() {
       </div>
       <div className='body_home'>
         <div className='recommend'>
-        {banners.map((banner, index) => (
-            <img key={index} src={banner} alt={`Banner ${index + 1}`} />
-          ))}
+          {banners.map((banner, index) => (
+              <img key={index} src={banner} alt={`Banner ${index + 1}`} />
+            ))}
         </div>
         <div className='main-page'>
           <div className='main-movie'>
-            <div className='new-movie'>
-              cái này là phim mới
+            <div className='nav-movie-container'>
+              <h2>Phim mới cập nhật</h2>
+              <div 
+                className={`nav-type ${selectedType === 'all' ? 'selected' : ''}`} 
+                onClick={() => handleTypeClick('all')}
+              >
+                Toàn bộ
+              </div>
+              <div 
+                className={`nav-type ${selectedType === 'single' ? 'selected' : ''}`} 
+                onClick={() => handleTypeClick('single')}
+              >
+                Phim lẻ
+              </div>
+              <div 
+                className={`nav-type ${selectedType === 'series' ? 'selected' : ''}`} 
+                onClick={() => handleTypeClick('series')}
+              >
+                Phim bộ
+              </div>
+            </div>
+            <div className='new-movie-container'>
+              {topMovies.map((movie, index) => (
+                <div className='movie-content' key={movie.id}>
+                  <div className='img'>
+                    <img alt='img' src={movie.thumbnail_image}></img>
+                    <i className='bx bx-play-circle' ></i>
+                  </div>
+                    <div 
+                      ref={el => movieTitlesRefs.current[index] = el}
+                      className={`new-title ${checkMarquee(index) ? 'marquee-active' : ''}`}
+                    >
+                      {movie.name}
+                    </div>
+                    <div className='new-nation'>{movie.nation}</div>
+                    <div className='movie-footer'>
+                      <div className='new-year'>Năm: {movie.release_year}</div>
+                      <div className='new-like'>{movie.likes}</div>
+                    </div>
+                </div>
+              ))}
             </div>
           </div>
           <aside className='bxh'>
             <h1>Bảng xếp hạng</h1>
             <div className='bxh-content'>
               {error && <p>Error: {error}</p>}
-              {topMovies.map(movie => (
+              {topMovies.map((movie, index) => (
                 <div className='child-content' key={movie.id}>
+                  <div className={`rank rank-${index + 1}`}>#{index + 1}</div>
                   <div className='img'>
                     <img alt={movie.name} src={movie.thumbnail_image} />
+                    <i className='bx bx-play-circle' ></i>
                   </div>
                   <div className='content-container'>
-                    <div className='title'>{movie.name}</div>
+                    <div className={`title rank-${index + 1 }`}>{movie.name}</div>
                     <div className='year'>{movie.release_year}</div>
                     <div className='icon'>
-                      <i className='bx bx-bar-chart-alt'>{movie.totalViews}</i>
+                      <i className='bx bx-bar-chart-alt'>{movie.totalViews} lượt xem</i>
                     </div>
+
                   </div>
                 </div>
               ))}
