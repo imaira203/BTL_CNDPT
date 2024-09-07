@@ -9,6 +9,32 @@ function generateToken() {
     return crypto.randomBytes(32).toString('hex');
   }
 
+  const categoryMapping = {
+    'action': 'Hành động',
+    'drama': 'Drama',
+    'comedy': 'Hài hước',
+    'romance': 'Lãng mạn',
+    'horror': 'Kinh dị',
+    'mystery': 'Trinh thám',
+    'historical': 'Cổ trang',
+    'documentary': 'Phim tài liệu',
+    'adventure': 'Phiêu lưu',
+    'sci-fi': 'Khoa học - viễn tưởng',
+    'animation': 'Hoạt hình',
+    'mythology': 'Thần thoại'
+  };
+  
+  const countryMapping = {
+    'vietnam': 'Việt Nam',
+    'usa': 'Hoa Kỳ',
+    'uk': 'Anh',
+    'japan': 'Nhật Bản',
+    'south-korea': 'Hàn Quốc',
+    'china': 'Trung Quốc',
+    'thailand': 'Thái Lan',
+    'india': 'Ấn Độ'
+  };
+
 
 const app = express();
 app.use(cors());
@@ -75,7 +101,57 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.get('api/get-video')
+app.get('/api/category/:categoryName', async (req, res) => {
+    const categoryName = req.params.categoryName;
+    const vietnameseCategory = categoryMapping[categoryName.toLowerCase()];
+  
+    if (!vietnameseCategory) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+  
+    try {
+      const { data: movies, error } = await db
+        .from('movies')
+        .select('*')
+        .ilike('category', `%${vietnameseCategory}%`);
+  
+      if (error) {
+        console.error('Database query error:', error);
+        return res.status(500).json({ error: error.message });
+      }
+  
+      res.status(200).json({ data: movies });
+    } catch (err) {
+      console.error('Server error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  app.get('/api/country/:countryName', async (req, res) => {
+    const countryName = req.params.countryName;
+    const vietnameseCountry = countryMapping[countryName.toLowerCase()];
+  
+    if (!vietnameseCountry) {
+      return res.status(404).json({ message: 'Country not found' });
+    }
+  
+    try {
+      const { data: movies, error } = await db
+        .from('movies')
+        .select('*')
+        .ilike('nation', `%${vietnameseCountry}%`);
+  
+      if (error) {
+        console.error('Database query error:', error);
+        return res.status(500).json({ error: error.message });
+      }
+  
+      res.status(200).json({ data: movies });
+    } catch (err) {
+      console.error('Server error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });  
 
 const port = 81;
 app.listen(port, () => {

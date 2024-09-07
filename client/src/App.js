@@ -5,7 +5,9 @@ import 'boxicons/css/boxicons.min.css';
 
 import Register from './routes/register/register';
 import Login from './routes/login/login';
-// import Profile from './routes/Profile/Profile';
+import Category from './routes/category/category';
+import Country from './routes/country/country';
+
 import './App.css';
 
 function App() {
@@ -15,6 +17,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path='/dang-nhap' element={<Login />} />
           <Route path='/dang-ky' element={<Register />} />
+          <Route path="/category/:categoryName" element={<Category />} />
+          <Route path="/country/:countryName" element={<Country />} />
         </Routes>
     </Router>
   );

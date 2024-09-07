@@ -12,6 +12,33 @@ function Home() {
     '../../images/test.jpg',
   ]);
 
+  const genres = [
+    { name: 'Hành động', path: 'action' },
+    { name: 'Drama', path: 'drama' },
+    { name: 'Hài hước', path: 'comedy' },
+    { name: 'Lãng mạn', path: 'romance' },
+    { name: 'Kinh dị', path: 'horror' },
+    { name: 'Trinh thám', path: 'detective' },
+    { name: 'Cổ trang', path: 'ancient' },
+    { name: 'Phim tài liệu', path: 'documentary' },
+    { name: 'Phiêu lưu', path: 'adventure' },
+    { name: 'Khoa học - viễn tưởng', path: 'scifi' },
+    { name: 'Hoạt hình', path: 'animation' },
+    { name: 'Thần thoại', path: 'mythology' }
+  ];
+  
+  const countries = [
+    { name: 'Việt Nam', path: 'vietnam' },
+    { name: 'Hoa Kỳ', path: 'usa' },
+    { name: 'Anh', path: 'uk' },
+    { name: 'Nhật Bản', path: 'japan' },
+    { name: 'Hàn Quốc', path: 'south-korea' },
+    { name: 'Trung Quốc', path: 'china' },
+    { name: 'Thái Lan', path: 'thailand' },
+    { name: 'Ấn Độ', path: 'india' }
+  ];
+  
+
   const SearchSubmit = (event) => {
     event.preventDefault(); 
     console.log(searchString);
@@ -74,20 +101,14 @@ function Home() {
               Thể loại
             </a>
             <ul className='dropdown-content'>
-              <li><a href='/category/action'>Hành động</a></li>
-              <li><a href='/category/drama'>Drama</a></li>
-              <li><a href='/category/comedy'>Hài hước</a></li>
-              <li><a href='/category/romance'>Lãng mạn</a></li>
-              <li><a href='/category/horror'>Kinh dị</a></li>
-              <li><a href='/category/horror'>Trinh thám</a></li>
-              <li><a href='/category/horror'>Cổ trang</a></li>
-              <li><a href='/category/horror'>Phim tài liệu</a></li>
-              <li><a href='/category/horror'>Phiêu lưu</a></li>
-              <li><a href='/category/horror'>Khoa học - viễn tưởng</a></li>
-              <li><a href='/category/horror'>Hoạt hình</a></li>
-              <li><a href='/category/horror'>Thần thoại</a></li>
+              {genres.map((genre) => (
+                <li key={genre.path}>
+                  <a href={`/category/${genre.path}`}>{genre.name}</a>
+                </li>
+              ))}
             </ul>
           </li>
+
           <li className='dropdown'>
             <a 
               href='/' 
@@ -97,14 +118,11 @@ function Home() {
               Quốc gia
             </a>
             <ul className='dropdown-content'>
-              <li><a href='/country/china'>Việt Nam</a></li>
-              <li><a href='/country/usa'>Hoa Kỳ</a></li>
-              <li><a href='/country/uk'>Anh</a></li>
-              <li><a href='/country/japan'>Nhật Bản</a></li>
-              <li><a href='/country/south-korea'>Hàn Quốc</a></li>
-              <li><a href='/country/china'>Trung Quốc</a></li>
-              <li><a href='/country/china'>Thái Lan</a></li>
-              <li><a href='/country/china'>Ấn Độ</a></li>
+              {countries.map((country) => (
+                <li key={country.path}>
+                  <a href={`/country/${country.path}`}>{country.name}</a>
+                </li>
+              ))}
             </ul>
           </li>
         </ul>
@@ -136,19 +154,19 @@ function Home() {
             <div className='bxh-content'>
               <div className='child-content'>
                 <div className='img'>
-                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
                 </div>
                 <div className='content-container'>
                   <div className='title'>abc</div>
                   <div className='year'>2024</div>
                   <div className='icon'>
-                    <i class='bx bx-bar-chart-alt' >124485</i>
+                    <i className='bx bx-bar-chart-alt' >124485</i>
                   </div>
                 </div>
               </div>
               <div className='child-content'>
                 <div className='img'>
-                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
                 </div>
                 <div className='content-container'>
                   <div className='title'>Mo</div>
@@ -160,37 +178,37 @@ function Home() {
               </div>
               <div className='child-content'>
                 <div className='img'>
-                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
                 </div>
                 <div className='content-container'>
                   <div className='title'>abc</div>
                   <div className='year'>2024</div>
                   <div className='icon'>
-                    <i class='bx bx-bar-chart-alt' >124485</i>
+                    <i className='bx bx-bar-chart-alt' >124485</i>
                   </div>
                 </div>
               </div>
               <div className='child-content'>
                 <div className='img'>
-                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
                 </div>
                 <div className='content-container'>
                   <div className='title'>abc</div>
                   <div className='year'>2024</div>
                   <div className='icon'>
-                    <i class='bx bx-bar-chart-alt' >124485</i>
+                    <i className='bx bx-bar-chart-alt' >124485</i>
                   </div>
                 </div>
               </div>
               <div className='child-content'>
                 <div className='img'>
-                  <img src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
+                  <img alt='img' src='https://image.motchilltv.vc/motchill/lieu-chu-ky-kieu-tang-x350.webp'></img>
                 </div>
                 <div className='content-container'>
                   <div className='title'>abc</div>
                   <div className='year'>2024</div>
                   <div className='icon'>
-                    <i class='bx bx-bar-chart-alt' >124485</i>
+                    <i className='bx bx-bar-chart-alt' >124485</i>
                   </div>
                 </div>
               </div>
