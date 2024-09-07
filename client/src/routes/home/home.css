@@ -283,7 +283,7 @@ h1 {
 .child-content {
     display: flex;
     flex-direction: row;
-    background-color: hsla(180, 1%, 72%, 0.682);
+    background-color: hsla(0, 0%, 100%, 0);
     height: 110px;
     border-radius: 5px;
 }
