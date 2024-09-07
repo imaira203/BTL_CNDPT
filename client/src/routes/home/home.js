@@ -1,5 +1,6 @@
 import './home.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import VideoContent from '../../components/VideoContent'; // Import VideoContent
 
 function Home() {
   const [actived, setActived] = useState('');
@@ -11,11 +12,12 @@ function Home() {
     '../../images/test.jpg',
     '../../images/test.jpg',
   ]);
-
+  
   const [topMovies, setTopMovies] = useState([]);
+  const [latestMovies, setLatestMovies] = useState([]);
+
   const [error, setError] = useState(null);
   const [selectedType, setSelectedType] = useState('all');
-
 
   const genres = [
     { name: 'Hành động', path: 'action' },
@@ -31,7 +33,7 @@ function Home() {
     { name: 'Hoạt hình', path: 'animation' },
     { name: 'Thần thoại', path: 'mythology' }
   ];
-  
+
   const countries = [
     { name: 'Việt Nam', path: 'vietnam' },
     { name: 'Hoa Kỳ', path: 'usa' },
@@ -48,7 +50,7 @@ function Home() {
   };
 
   const SearchSubmit = (event) => {
-    event.preventDefault(); 
+    event.preventDefault();
     console.log(searchString);
   };
 
@@ -70,40 +72,34 @@ function Home() {
   }, [actived]);
 
   useEffect(() => {
-    const fetchTopMovies = async () => {
+    const fetchMovies = async () => {
       try {
-        const response = await fetch('http://localhost:81/api/top-movies');
-        if (!response.ok) {
-          const errorText = await response.text(); 
-          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+        const topMoviesResponse = await fetch('http://localhost:81/api/top-movies');
+        if (!topMoviesResponse.ok) {
+          const errorText = await topMoviesResponse.text();
+          throw new Error(`HTTP error! Status: ${topMoviesResponse.status}, Message: ${errorText}`);
         }
+        const topMoviesData = await topMoviesResponse.json();
+        setTopMovies(topMoviesData.data);
 
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          const text = await response.text(); 
-          throw new Error(`Expected JSON response, got: ${text}`);
+        const latestMoviesResponse = await fetch('http://localhost:81/api/latest-movies');
+        if (!latestMoviesResponse.ok) {
+          const errorText = await latestMoviesResponse.text();
+          throw new Error(`HTTP error! Status: ${latestMoviesResponse.status}, Message: ${errorText}`);
         }
-
-        const data = await response.json();
-        setTopMovies(data.data);
+        const latestMoviesData = await latestMoviesResponse.json();
+        setLatestMovies(latestMoviesData.data.all); // Adjust based on actual data structure
       } catch (error) {
-        console.error('Error fetching top movies:', error);
+        console.error('Error fetching movies:', error);
         setError(error.message);
       }
     };
 
-    fetchTopMovies();
+    fetchMovies();
   }, []);
 
   const handleNavClick = (page) => {
     setActived(page);
-  };
-
-  const movieTitlesRefs = useRef([]);
-
-  const checkMarquee = (index) => {
-    const titleElement = movieTitlesRefs.current[index];
-    return titleElement && titleElement.scrollWidth > titleElement.clientWidth;
   };
 
   return (
@@ -208,25 +204,11 @@ function Home() {
               </div>
             </div>
             <div className='new-movie-container'>
-              {topMovies.map((movie, index) => (
-                <div className='movie-content' key={movie.id}>
-                  <div className='img'>
-                    <img alt='img' src={movie.thumbnail_image}></img>
-                    <i className='bx bx-play-circle' ></i>
-                  </div>
-                    <div 
-                      ref={el => movieTitlesRefs.current[index] = el}
-                      className={`new-title ${checkMarquee(index) ? 'marquee-active' : ''}`}
-                    >
-                      {movie.name}
-                    </div>
-                    <div className='new-nation'>{movie.nation}</div>
-                    <div className='movie-footer'>
-                      <div className='new-year'>Năm: {movie.release_year}</div>
-                      <div className='new-like'>{movie.likes}</div>
-                    </div>
-                </div>
-              ))}
+              {latestMovies
+                .filter(movie => selectedType === 'all' || (selectedType === 'single' && movie.theloai === 'Phim lẻ') || (selectedType === 'series' && movie.theloai === 'Phim bộ'))
+                .map((movie) => (
+                  <VideoContent key={movie.id} movie={movie} />
+                ))}
             </div>
           </div>
           <aside className='bxh'>
@@ -246,7 +228,6 @@ function Home() {
                     <div className='icon'>
                       <i className='bx bx-bar-chart-alt'>{movie.totalViews} lượt xem</i>
                     </div>
-
                   </div>
                 </div>
               ))}

@@ -204,6 +204,30 @@ app.get('/api/category/:categoryName', async (req, res) => {
     }
 });
 
+app.get('/api/latest-movies', async (req, res) => {
+    try {
+        const { data: movies, error } = await db
+            .from('movies')
+            .select('*')
+            .order('last_updated', { ascending: false })
+            .limit(10);
+
+        if (error) {
+            throw error;
+        }
+
+        const categorizedMovies = {
+            all: movies,
+            single: movies.filter(movie => movie.theloai === 'Phim lẻ'),
+            series: movies.filter(movie => movie.theloai === 'Phim bộ')
+        };
+
+        res.status(200).json({ data: categorizedMovies });
+    } catch (error) {
+        console.error('Error fetching latest movies:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 const port = 81;
 app.listen(port, () => {

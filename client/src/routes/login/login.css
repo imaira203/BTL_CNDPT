@@ -130,3 +130,10 @@ input.password {
 .password-container.error input {
   border: 2px solid red;
 }
+
+.login-btn button {
+    width: 90px;
+    height: 45px;
+    background-color: rgba(144, 248, 248, 0.89);
+    border-radius: 25px;
+}
