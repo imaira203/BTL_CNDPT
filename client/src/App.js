@@ -7,6 +7,8 @@ import Register from './routes/register/register';
 import Login from './routes/login/login';
 import Category from './routes/category/category';
 import Country from './routes/country/country';
+import Library from './routes/library/library';
+
 
 import './App.css';
 
@@ -17,6 +19,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path='/dang-nhap' element={<Login />} />
           <Route path='/dang-ky' element={<Register />} />
+          <Route path='/thu-vien' element={<Library />} />
           <Route path="/category/:categoryName" element={<Category />} />
           <Route path="/country/:countryName" element={<Country />} />
         </Routes>

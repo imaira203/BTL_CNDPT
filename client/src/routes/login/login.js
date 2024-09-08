@@ -48,7 +48,9 @@ function Login() {
         const data = await response.json();
         console.log(data);
         localStorage.setItem('token', data.data.token);
-        localStorage.setItem('accountId', data.data.id);
+        localStorage.setItem('userId', data.data.id);
+        localStorage.setItem('role', data.data.role);
+        localStorage.setItem('active', 'home');
         setIsSuccess(true);
         setPopupMessage('Đăng nhập thành công');
         setShowPopup(true);

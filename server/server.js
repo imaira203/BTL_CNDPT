@@ -90,7 +90,8 @@ app.post('/api/login', async (req, res) => {
                     id: account.id, 
                     username: account.username,
                     name: account.name,
-                    email: account.email
+                    email: account.email,
+                    role: account.role
                 }
             });
         } else {

@@ -1,25 +1,42 @@
-import './home.css';
+import './library.css';
+
 import { useEffect, useState } from 'react';
 import VideoContent from '../../components/VideoContent'; // Import VideoContent
+
 const API_URL = process.env.REACT_APP_API_URL;
 
 
-function Home() {
+function Library() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [actived, setActived] = useState('');
   const [searchString, setSearchString] = useState('');
   const [userRole, setUserRole] = useState('');
   const [dropdownVisible, setDropdownVisible] = useState(false);
-
-  const [recommendMovies, setRecommendMovies] = useState([]);
-  const [topMovies, setTopMovies] = useState([]);
   const [latestMovies, setLatestMovies] = useState([]);
 
-  const [error, setError] = useState(null);
-  const [selectedType, setSelectedType] = useState('all');
+  //eslint-disable-next-line
+  let [selectedType] = useState('');
+
 
   useEffect(() => {
-    document.title = 'PhimHay - Trang chủ';
+    document.title = 'PhimHay - Thư viện';
+  }, []);
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const latestMoviesResponse = await fetch(`${API_URL}/latest-movies`);
+        if (!latestMoviesResponse.ok) {
+          const errorText = await latestMoviesResponse.text();
+          throw new Error(`HTTP error! Status: ${latestMoviesResponse.status}, Message: ${errorText}`);
+        }
+        const latestMoviesData = await latestMoviesResponse.json();
+        setLatestMovies(latestMoviesData.data.all); 
+      } catch (error) {
+        console.error('Error fetching movies:', error);
+      }
+    };
+    fetchMovies();
   }, []);
 
   useEffect(() => {
@@ -42,7 +59,6 @@ function Home() {
     localStorage.removeItem('role');
     setLoggedIn(false);
     setDropdownVisible(false);
-    setActived('home');
   };
 
   const genres = [
@@ -71,9 +87,6 @@ function Home() {
     { name: 'Ấn Độ', path: 'india' }
   ];
 
-  const handleTypeClick = (type) => {
-    setSelectedType(type);
-  };
 
   const SearchSubmit = (event) => {
     event.preventDefault();
@@ -88,8 +101,7 @@ function Home() {
     const savedActive = localStorage.getItem('active');
     if (savedActive) {
       setActived(savedActive);
-    } 
-    else {
+    } else {
       setActived('home')
     }
   }, []);
@@ -100,51 +112,6 @@ function Home() {
     }
   }, [actived]);
 
-  useEffect(() => {
-    const fetchRecommend = async () => {
-      try {
-        const response = await fetch(`${API_URL}/getRecommend`);
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
-        }
-        const data = await response.json();
-        console.log(data)
-        setRecommendMovies(data.data);
-      } catch (error) {
-        console.error('Error fetching recommend:', error);
-        setError(error.message);
-      }
-    };
-    fetchRecommend();
-  }, []);
-
-  useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const topMoviesResponse = await fetch(`${API_URL}/top-movies`);
-        if (!topMoviesResponse.ok) {
-          const errorText = await topMoviesResponse.text();
-          throw new Error(`HTTP error! Status: ${topMoviesResponse.status}, Message: ${errorText}`);
-        }
-        const topMoviesData = await topMoviesResponse.json();
-        setTopMovies(topMoviesData.data);
-
-        const latestMoviesResponse = await fetch(`${API_URL}/latest-movies`);
-        if (!latestMoviesResponse.ok) {
-          const errorText = await latestMoviesResponse.text();
-          throw new Error(`HTTP error! Status: ${latestMoviesResponse.status}, Message: ${errorText}`);
-        }
-        const latestMoviesData = await latestMoviesResponse.json();
-        setLatestMovies(latestMoviesData.data.all); 
-      } catch (error) {
-        console.error('Error fetching movies:', error);
-        setError(error.message);
-      }
-    };
-    fetchMovies();
-  }, []);
-
   const handleNavClick = (page) => {
     setActived(page);
   };
@@ -152,9 +119,7 @@ function Home() {
   return (
     <div className="main">
       <div className="header">
-        <a href="/" className="logo"
-           onClick={() => handleNavClick('home')}
-        >
+        <a href="/" className="logo">
           <i className='bx bxs-movie'>PhimHay</i>
         </a>
         <div className='bx bx-menu' id='menu-icon'></div>
@@ -254,69 +219,27 @@ function Home() {
         )}
       </div>
       <div className='body_home'>
-        <div className='recommend'>
-          {recommendMovies.map((movie) => (
-            <img key={movie.id} src={movie.thumbnail} alt={movie.name} />
-          ))}
-        </div>
-        <div className='main-page'>
-          <div className='main-movie'>
-            <div className='nav-movie-container'>
-              <h2>Phim mới cập nhật</h2>
-              <div 
-                className={`nav-type ${selectedType === 'all' ? 'selected' : ''}`} 
-                onClick={() => handleTypeClick('all')}
-              >
-                Toàn bộ
-              </div>
-              <div 
-                className={`nav-type ${selectedType === 'single' ? 'selected' : ''}`} 
-                onClick={() => handleTypeClick('single')}
-              >
-                Phim lẻ
-              </div>
-              <div 
-                className={`nav-type ${selectedType === 'series' ? 'selected' : ''}`} 
-                onClick={() => handleTypeClick('series')}
-              >
-                Phim bộ
-              </div>
-            </div>
-            <div className='new-movie-container'>
-            {latestMovies
-              .filter(movie => selectedType === 'all' || (selectedType === 'single' && movie.theloai === 'Phim lẻ') || (selectedType === 'series' && movie.theloai === 'Phim bộ'))
-              .slice(0, 10)
-              .map((movie) => (
-                <VideoContent key={movie.id} movie={movie} />
-              ))}
+        <div className='library-container'>
+          <h1>Phim lẻ</h1>
+          <div className='new-movie-container'>
+                {latestMovies
+                  .filter(movie => (selectedType = 'single' && movie.theloai === "Phim lẻ"))
+                  .map((movie) => (
+                    <VideoContent key={movie.id} movie={movie} />
+                  ))}
           </div>
+          <h1>Phim bộ</h1>
+          <div className='new-movie-container'>
+              {latestMovies
+                .filter(movie => (selectedType = 'series' && movie.theloai === "Phim bộ"))
+                .map((movie) => (
+                  <VideoContent key={movie.id} movie={movie} />
+                ))}
           </div>
-          <aside className='bxh'>
-            <h1>Bảng xếp hạng</h1>
-            <div className='bxh-content'>
-              {error && <p>Error: {error}</p>}
-              {topMovies.map((movie, index) => (
-                <div className='child-content' key={movie.id}>
-                  <div className={`rank rank-${index + 1}`}>#{index + 1}</div>
-                  <div className='img'>
-                    <img alt={movie.name} src={movie.thumbnail_image} />
-                    <i className='bx bx-play-circle' ></i>
-                  </div>
-                  <div className='content-container'>
-                    <div className={`title rank-${index + 1 }`}>{movie.name}</div>
-                    <div className='year'>{movie.release_year}</div>
-                    <div className='icon'>
-                      <i className='bx bx-bar-chart-alt'>{movie.totalViews} lượt xem</i>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </aside>
         </div>
       </div>
     </div>
   );
 }
 
-export default Home;
+export default Library;

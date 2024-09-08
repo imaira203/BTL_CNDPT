@@ -56,7 +56,6 @@ body::-webkit-scrollbar {
     position: relative;
 }
 
-  
 .dropdown {
     position: relative;
     display: inline-block;
@@ -117,6 +116,36 @@ body::-webkit-scrollbar {
     grid-gap: 0.3em;
 }
 
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    background-color: #0a0d19;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-dropdown li {
+    padding: 8px 12px;
+    margin-top: 10px;
+}
+
+.profile-dropdown a {
+    text-decoration: none;
+    color: #fff;
+    display: block;
+}
+
+.profile-dropdown li:hover {
+    background-color: #11172b;
+}
+.profile-container:hover .profile-dropdown {
+    display: block;
+}
+
 .navbar a{
     font-size: 1rem;
     font-weight: 500;
@@ -146,6 +175,23 @@ li:hover::after,
     z-index: 1000001;
     display: none;
 }
+
+.profile-container{
+    height: 50px;
+    width: 50px;
+}
+
+.profile-container img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border: 1px solid rgba(20, 16, 65, 0.767);
+    background-color: #101732;
+    border-radius: 50%;
+}
+
+
+
 .btn{
     padding: 0.7rem 1.4rem;
     background: rgb(70,129,244);
