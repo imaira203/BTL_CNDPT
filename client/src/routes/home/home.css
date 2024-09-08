@@ -126,6 +126,7 @@ body::-webkit-scrollbar {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    padding: 10px;
 }
 
 .profile-dropdown li {
@@ -177,20 +178,22 @@ li:hover::after,
 }
 
 .profile-container{
-    height: 50px;
-    width: 50px;
+    height: 60px;
+    width: 60px;
+    padding: 5px;
 }
 
 .profile-container img {
-    height: 100%;
-    width: 100%;
+    height: 50px;
+    width: 50px;
     object-fit: cover;
     border: 1px solid rgba(20, 16, 65, 0.767);
     background-color: #101732;
     border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-
-
 
 .btn{
     padding: 0.7rem 1.4rem;

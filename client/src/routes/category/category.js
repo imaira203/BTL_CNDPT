@@ -26,7 +26,6 @@ function Category() {
   const [actived, setActived] = useState('');
   const [searchString, setSearchString] = useState('');
   const [userRole, setUserRole] = useState('');
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [movies, setMovies] = useState([]);
 
   const genres = [
@@ -88,15 +87,10 @@ function Category() {
     }
   }, []);
 
-  const handleProfileClick = () => {
-    setDropdownVisible(!dropdownVisible);
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     setLoggedIn(false);
-    setDropdownVisible(false);
   };
 
   const SearchSubmit = (event) => {
@@ -203,9 +197,7 @@ function Category() {
               src="/images/profile.png"
               alt="Profile"
               className="profile-icon"
-              onClick={handleProfileClick}
             />
-            {dropdownVisible && (
               <ul className="profile-dropdown">
                 <li>
                   <a href="/profile">Hồ sơ</a>
@@ -221,7 +213,6 @@ function Category() {
                   </a>
                 </li>
               </ul>
-            )}
           </div>
         ) : (
           <a href="/dang-nhap" className="btn">
