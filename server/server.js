@@ -15,14 +15,15 @@ function generateToken() {
     'comedy': 'Hài hước',
     'romance': 'Lãng mạn',
     'horror': 'Kinh dị',
-    'mystery': 'Trinh thám',
-    'historical': 'Cổ trang',
+    'detective': 'Trinh thám',
+    'ancient': 'Cổ trang', 
     'documentary': 'Phim tài liệu',
     'adventure': 'Phiêu lưu',
-    'sci-fi': 'Khoa học - viễn tưởng',
+    'scifi': 'Khoa học - viễn tưởng',
     'animation': 'Hoạt hình',
     'mythology': 'Thần thoại'
   };
+  
   
   const countryMapping = {
     'vietnam': 'Việt Nam',
