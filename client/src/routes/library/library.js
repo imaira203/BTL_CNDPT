@@ -113,7 +113,9 @@ function Library() {
   return (
     <div className="main">
       <div className="header">
-        <a href="/" className="logo">
+        <a href="/" className="logo"
+          onClick={() => handleNavClick('home')}
+          >
           <i className='bx bxs-movie'>PhimHay</i>
         </a>
         <div className='bx bx-menu' id='menu-icon'></div>
