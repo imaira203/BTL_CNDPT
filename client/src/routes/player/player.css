@@ -1,0 +1,79 @@
+.player-container {
+    width: 100%;
+    height: max-content;
+    display: flex;
+    flex-direction: row;
+    padding: 5.5em;
+}
+
+.main-player-container{
+    position: relative;
+    height: max-content;
+    width: 70vw;
+    padding: 1.2em
+}
+
+.main-player-container iframe {
+    margin-top: 1.2em;
+    width: 100%;
+    aspect-ratio: 14/7;
+}
+
+.main-player-container h3 {
+    margin-top: 0.5em;
+    margin-bottom: 0.3em;
+}
+
+.main-player-container h3,
+.main-player-container .chapter-list {
+    color: #fff;;
+}
+
+.chapter-list ul {
+    display: grid;
+    grid-template-columns: repeat(10, max-content);
+    gap: 0.7em;
+}
+
+.chapter-list ul li button {
+    color: #fff;
+    border-radius: 25px;
+    height: 2.7em;
+    font-weight: 600;
+    width: 4.8em;
+    border: 1px solid #fff;
+    background-color: rgba(30, 43, 80, 0.648);
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.chapter-list ul li button:active {
+    transform: scale(1.15);
+    background-color: rgba(233, 81, 81, 0.934);
+}
+
+.chapter-list ul li button.active {
+    background-color: rgba(228, 59, 59, 0.77);
+}
+
+.movie-info {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    margin-top: 0.7em;
+    display: flex;
+    flex-direction: row;
+    gap: 0.8em;
+}
+.movie-info img{
+    width: 30%;
+    object-fit: cover;
+}
+
+.movie-info .info-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    gap: 0.6em
+}

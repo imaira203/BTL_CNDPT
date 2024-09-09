@@ -1,6 +1,6 @@
 import './home.css';
 import { useEffect, useState } from 'react';
-import VideoContent from '../../components/VideoContent'; // Import VideoContent
+import VideoContent from '../../components/VideoContent'; 
 const API_URL = process.env.REACT_APP_API_URL;
 
 
