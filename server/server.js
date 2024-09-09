@@ -36,7 +36,6 @@ function generateToken() {
     'india': 'Ấn Độ'
   };
 
-
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -248,6 +247,34 @@ app.get('/api/latest-movies', async (req, res) => {
     }
 });
 
+app.get('/api/getMovie/:id', async (req, res) => {
+    const { id } = req.params;
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ message: 'Invalid ID' });
+    }
+    
+    try {
+      const { data: movie, error } = await db
+        .from('movies')
+        .select('*')
+        .eq('id', id)
+        .single();
+  
+      if (error) {
+        throw error;
+      }
+  
+      if (movie) {
+        res.json(movie);
+      } else {
+        res.status(404).json({ message: 'Movie not found' });
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
 const port = 81;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

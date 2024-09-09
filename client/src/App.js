@@ -8,6 +8,7 @@ import Login from './routes/login/login';
 import Category from './routes/category/category';
 import Country from './routes/country/country';
 import Library from './routes/library/library';
+import Player from './routes/player/player.js'; 
 
 
 import './App.css';
@@ -22,7 +23,8 @@ function App() {
           <Route path='/thu-vien' element={<Library />} />
           <Route path="/category/:categoryName" element={<Category />} />
           <Route path="/country/:countryName" element={<Country />} />
-        </Routes>
+          <Route path="/movie/:slug" element={<Player />} />
+          </Routes>
     </Router>
   );
 }
