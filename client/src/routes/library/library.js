@@ -52,6 +52,7 @@ function Library() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('userId');
     setLoggedIn(false);
   };
 
@@ -65,7 +66,7 @@ function Library() {
     { name: 'Cổ trang', path: 'ancient' },
     { name: 'Phim tài liệu', path: 'documentary' },
     { name: 'Phiêu lưu', path: 'adventure' },
-    { name: 'Khoa học - viễn tưởng', path: 'scifi' },
+    { name: 'Khoa học - Viễn tưởng', path: 'scifi' },
     { name: 'Hoạt hình', path: 'animation' },
     { name: 'Thần thoại', path: 'mythology' }
   ];

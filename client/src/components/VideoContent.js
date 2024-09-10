@@ -6,14 +6,28 @@ function VideoContent({ movie }) {
   const navigate = useNavigate();
 
   const slugify = (text) => {
-    return text
+    const charMap = {
+      'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+      'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+      'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+      'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+      'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+      'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+      'Đ': 'D', 'đ': 'd'
+    };
+  
+    const normalizedText = text
+      .split('')
+      .map(char => charMap[char] || char)
+      .join('');
+  
+    return normalizedText
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') 
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-') 
-      .replace(/^-+|-+$/g, '');
+      .replace(/^-+|-+$/g, ''); 
   };
-  
 
   const checkMarquee = () => {
     const titleElement = titleRef.current;

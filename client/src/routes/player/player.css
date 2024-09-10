@@ -9,7 +9,7 @@
 .main-player-container{
     position: relative;
     height: max-content;
-    width: 70vw;
+    width: 70%;
     padding: 1.2em
 }
 
@@ -28,7 +28,6 @@
 .main-player-container .chapter-list {
     color: #fff;;
 }
-
 .chapter-list ul {
     display: grid;
     grid-template-columns: repeat(10, max-content);
@@ -75,5 +74,48 @@
     display: flex;
     flex-direction: column;
     color: #fff;
-    gap: 0.6em
+    gap: 0.6em;
 }
+
+.recommend h1 {
+    margin-top: 0.8em;
+    margin-bottom: 0.2em;
+}
+
+.player-container .recommend{
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    height: max-content;
+    gap: 0.4em;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-container .recommend .movie-content {
+    width: 180px;
+    cursor: pointer;
+    border: 3px solid #FFF;
+    overflow: hidden;
+}
+
+.main-player-container .comment {
+    color: #FFF;
+    height: max-content;
+    margin-top: 1.2em;
+    background-color: rgba(11, 17, 59, 0.944);
+}
+
+.main-player-container .comment h1 {
+    width: 100%;
+    background-color: #04092b;
+}
+
+.main-player-container .comment ul {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+

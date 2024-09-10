@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import VideoContent from '../../components/VideoContent'; 
 import './player.css';
 
 const API_URL = process.env.REACT_APP_API_URL;
@@ -12,8 +13,10 @@ function Player() {
   const [actived, setActived] = useState('');
   const [searchString, setSearchString] = useState('');
   const [userRole, setUserRole] = useState('');
-
+  const [recommendedMovies, setRecommendedMovies] = useState([]);
+  const [userDetails, setUserDetails] = useState([]);
   const [totalViews, setTotalViews] = useState(0);
+  const [newComment, setNewComment] = useState('');
 
   const genres = [
     { name: 'Hành động', path: 'action' },
@@ -25,7 +28,7 @@ function Player() {
     { name: 'Cổ trang', path: 'ancient' },
     { name: 'Phim tài liệu', path: 'documentary' },
     { name: 'Phiêu lưu', path: 'adventure' },
-    { name: 'Khoa học - viễn tưởng', path: 'scifi' },
+    { name: 'Khoa học - Viễn tưởng', path: 'scifi' },
     { name: 'Hoạt hình', path: 'animation' },
     { name: 'Thần thoại', path: 'mythology' }
   ];
@@ -61,6 +64,30 @@ function Player() {
   }, []);
 
   useEffect(() => {
+    const fetchRandomMovies = async () => {
+      try {
+        const response = await fetch(`${API_URL}/latest-movies`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+    
+        const movies = data.data.all;
+    
+        if (!Array.isArray(movies)) {
+          throw new Error('Movies data is not an array');
+        }
+    
+        const shuffledMovies = movies.sort(() => 0.5 - Math.random());
+        const selectedMovies = shuffledMovies.slice(0, 5);
+    
+        setRecommendedMovies(selectedMovies);
+      } catch (error) {
+        console.error('Error fetching movies:', error);
+      }
+    };
+    fetchRandomMovies();    
+
     const fetchMovies = async () => {
       try {
         const response = await fetch(`${API_URL}/latest-movies`);
@@ -76,6 +103,7 @@ function Player() {
         console.error('Error fetching movies:', error);
       }
     };
+    fetchMovies();
 
     const fetchMovieDetails = async (id) => {
       try {
@@ -99,17 +127,65 @@ function Player() {
       }
     };
 
-    fetchMovies();
+    const fetchUserDetails = async () => {
+      try {
+        const response = await fetch(`${API_URL}/users`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setUserDetails(data.users);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    fetchUserDetails();
   }, [slug]);
 
   const slugify = (text) => {
-    return text
+    const charMap = {
+      'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+      'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+      'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+      'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+      'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+      'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+      'Đ': 'D', 'đ': 'd'
+    };
+  
+    const normalizedText = text
+      .split('')
+      .map(char => charMap[char] || char)
+      .join('');
+  
+    return normalizedText
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') 
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-') 
-      .replace(/^-+|-+$/g, '');
+      .replace(/^-+|-+$/g, ''); 
   };
+
+  const renderComments = () => {
+    if (!movie || !movie.comments || movie.comments.length === 0) {
+      return <p>Chưa có bình luận.</p>;
+    }
+  
+    const userMap = userDetails.reduce((map, user) => {
+      map[user.id] = user.name;
+      return map;
+    }, {});
+  
+    return (
+      <ul>
+        {movie.comments.map((comment, index) => (
+          <li key={index}>
+            <strong>{userMap[comment.user] || 'Người dùng không xác định'}:</strong> {comment.comment}
+          </li>
+        ))}
+      </ul>
+    );
+  };  
 
   const handleChapterChange = (chapter) => {
     setSelectedChapter(chapter);
@@ -131,8 +207,41 @@ function Player() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('userId');
     setLoggedIn(false);
     setActived('home');
+  };
+
+  const handleCommentSubmit = async (event) => {
+    event.preventDefault();
+    if (!newComment.trim()) return;
+    const userId = localStorage.getItem('userId');
+    try {
+      const response = await fetch(`${API_URL}/post-comment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          movieId: movie.id,
+          id: userId,
+          comment: newComment
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setMovie(prevMovie => ({
+        ...prevMovie,
+        comments: [...prevMovie.comments, data.comment]
+      }));
+      setNewComment('');
+    } catch (error) {
+      console.error('Error posting comment:', error);
+    }
   };
 
   const isLoading = !movie;
@@ -286,7 +395,32 @@ function Player() {
               )}
             </div>
           </div>
+          <div className="comment">
+              <h1>Bình luận:</h1>
+              {renderComments()}
+              {loggedIn && (
+                <form onSubmit={handleCommentSubmit} className="comment-form">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Nhập bình luận..."
+                    required
+                  />
+                  <button type="submit">Gửi bình luận</button>
+                </form>
+              )}
+          </div>
         </main>
+        <div className='recommend'>
+          <h1>Được đề xuất</h1>
+          {recommendedMovies.length === 0 ? (
+            <p>Đang tải phim gợi ý...</p>
+          ) : (
+            recommendedMovies.map((movie) => (
+              <VideoContent key={movie.id} movie={movie} />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ function generateToken() {
     'ancient': 'Cổ trang', 
     'documentary': 'Phim tài liệu',
     'adventure': 'Phiêu lưu',
-    'scifi': 'Khoa học - viễn tưởng',
+    'scifi': 'Khoa học - Viễn tưởng',
     'animation': 'Hoạt hình',
     'mythology': 'Thần thoại'
   };
@@ -274,6 +274,60 @@ app.get('/api/getMovie/:id', async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   });
+
+app.get('/api/users', async (req, res) => {
+  try {
+    const { data, error } = await db
+      .from('accounts')
+      .select('id, name');
+
+    if (error) {
+      throw error;
+    }
+    res.status(200).json({ users: data });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.post('/api/post-comment', async (req, res) => {
+  const { movieId, id, comment } = req.body;
+
+  if (!id || !comment) {
+    return res.status(400).json({ error: 'Invalid request data' });
+  }
+
+  try {
+    const { data: movie, error: fetchError } = await db
+      .from('movies')
+      .select('comments')
+      .eq('id', movieId)
+      .single();
+
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    const updatedComments = [...(movie.comments || []), { user: id, comment }];
+
+    const { data: updatedMovie, error: updateError } = await db
+      .from('movies')
+      .update({ comments: updatedComments })
+      .eq('id', movieId)
+      .single();
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    res.status(200).json({ comment: { user: id, comment }, ...updatedMovie });
+  } catch (error) {
+    console.error('Error posting comment:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});  
   
 const port = 81;
 app.listen(port, () => {

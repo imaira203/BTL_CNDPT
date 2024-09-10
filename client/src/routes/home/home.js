@@ -1,6 +1,7 @@
 import './home.css';
 import { useEffect, useState } from 'react';
 import VideoContent from '../../components/VideoContent'; 
+import { useNavigate } from 'react-router-dom';
 const API_URL = process.env.REACT_APP_API_URL;
 
 
@@ -16,6 +17,7 @@ function Home() {
 
   const [error, setError] = useState(null);
   const [selectedType, setSelectedType] = useState('all');
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title = 'PhimHay - Trang chủ';
@@ -36,8 +38,33 @@ function Home() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('userId');
     setLoggedIn(false);
     setActived('home');
+  };
+
+  const slugify = (text) => {
+    const charMap = {
+      'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+      'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+      'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+      'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+      'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+      'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+      'Đ': 'D', 'đ': 'd'
+    };
+  
+    const normalizedText = text
+      .split('')
+      .map(char => charMap[char] || char)
+      .join('');
+  
+    return normalizedText
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-') 
+      .replace(/^-+|-+$/g, ''); 
   };
 
   const genres = [
@@ -50,7 +77,7 @@ function Home() {
     { name: 'Cổ trang', path: 'ancient' },
     { name: 'Phim tài liệu', path: 'documentary' },
     { name: 'Phiêu lưu', path: 'adventure' },
-    { name: 'Khoa học - viễn tưởng', path: 'scifi' },
+    { name: 'Khoa học - Viễn tưởng', path: 'scifi' },
     { name: 'Hoạt hình', path: 'animation' },
     { name: 'Thần thoại', path: 'mythology' }
   ];
@@ -77,6 +104,11 @@ function Home() {
 
   const SearchChange = (event) => {
     setSearchString(event.target.value);
+  };
+
+  const handleMovieClick = (movieName) => {
+    const slug = slugify(movieName);
+    navigate(`/movie/${slug}`);
   };
 
   useEffect(() => {
@@ -288,7 +320,7 @@ function Home() {
             <div className='bxh-content'>
               {error && <p>Error: {error}</p>}
               {topMovies.map((movie, index) => (
-                <div className='child-content' key={movie.id}>
+                <div className='child-content' key={movie.id} onClick={() => handleMovieClick(movie.name)}>
                   <div className={`rank rank-${index + 1}`}>#{index + 1}</div>
                   <div className='img'>
                     <img alt={movie.name} src={movie.thumbnail_image} />
