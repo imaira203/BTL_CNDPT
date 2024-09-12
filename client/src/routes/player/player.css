@@ -8,6 +8,7 @@
 
 .main-player-container{
     position: relative;
+    min-height: 65em;
     height: max-content;
     width: 70%;
     padding: 1.2em
@@ -106,7 +107,7 @@
 
 .player-container .comment {
     color: #FFF;
-    min-height: max-content;
+    min-height: 60em;
     max-height: 65em;
     margin-top: 1.2em;
     background-color: rgba(5, 9, 41, 0.944);
@@ -114,6 +115,10 @@
     overflow-wrap: break-word;
     padding: 0.7em;
     border-radius: 10px;
+}
+
+.no-comment {
+    text-align: center;
 }
 
 .comment::-webkit-scrollbar {

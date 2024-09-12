@@ -168,7 +168,7 @@ function Player() {
 
   const renderComments = () => {
     if (!movie || !movie.comments || movie.comments.length === 0) {
-      return <p>Chưa có bình luận.</p>;
+      return <h1 className='no-comment'>Chưa có bình luận.</h1>;
     }
   
     const userMap = userDetails.reduce((map, user) => {
