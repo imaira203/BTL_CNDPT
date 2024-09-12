@@ -328,6 +328,31 @@ app.post('/api/post-comment', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });  
+
+app.get('/api/getUser/:id', async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const { data, error } = await db
+      .from('accounts')
+      .select('username, name, email, favorited')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching data from Supabase:', error);
+      throw error;
+    }
+
+    if (data) {
+      res.json({ user: data });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error:', error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
   
 const port = 81;
 app.listen(port, () => {

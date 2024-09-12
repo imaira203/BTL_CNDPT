@@ -79,7 +79,7 @@ function Player() {
         }
     
         const shuffledMovies = movies.sort(() => 0.5 - Math.random());
-        const selectedMovies = shuffledMovies.slice(0, 5);
+        const selectedMovies = shuffledMovies.slice(0, 7);
     
         setRecommendedMovies(selectedMovies);
       } catch (error) {
@@ -165,6 +165,10 @@ function Player() {
       .replace(/[^a-z0-9]+/g, '-') 
       .replace(/^-+|-+$/g, ''); 
   };
+
+  const handleLike = async() => {
+    
+  }
 
   const renderComments = () => {
     if (!movie || !movie.comments || movie.comments.length === 0) {
@@ -325,7 +329,7 @@ function Player() {
             />
             <ul className="profile-dropdown">
               <li>
-                <a href="/profile">Hồ sơ</a>
+                <a href="/ho-so">Hồ sơ</a>
               </li>
               {userRole === 'admin' && (
                 <li>
@@ -344,7 +348,11 @@ function Player() {
 
       <div className="player-container">
         <main className="main-player-container">
-          <h1>{isLoading ? 'Đang tải...' : `${movie.name} - Tập ${selectedChapter.chap}`}</h1>
+        <h1>
+          {isLoading 
+            ? 'Đang tải...' 
+            : `${movie.name}${movie.theloai === 'Phim bộ' ? ` - Tập ${selectedChapter.chap}` : ' - Phim lẻ'}`}
+        </h1>
           <div className="video-player">
             {isLoading ? (
               <iframe title='player' src='' alt='Loading...' allowFullScreen />
@@ -385,6 +393,9 @@ function Player() {
               ) : (
                 <>
                   <h2>{movie.name}</h2>
+                  <button className='like-btn' onClick={handleLike}>
+                    <i class='bx bxs-heart'></i> Yêu thích
+                  </button>
                   <p><strong>Số tập:</strong> {movie.chapter.length}</p>
                   <p><strong>Thể loại:</strong> {Array.isArray(movie.category) ? movie.category.join(', ') : movie.category}</p>
                   <p><strong>Diễn viên:</strong> {movie.actors}</p>
@@ -397,11 +408,7 @@ function Player() {
           </div>
         </main>
         <div className='comment-box'>
-          <h1>Bình luận:</h1>
-        <div className="comment">
-              {renderComments()}
-        </div>
-        {loggedIn && (
+          {loggedIn && (
                 <form onSubmit={handleCommentSubmit} className="comment-form">
                   <textarea
                     value={newComment}
@@ -413,18 +420,23 @@ function Player() {
                     <i class='bx bxs-send'></i>
                   </button>
                 </form>
-              )}
+          )}
+        <div className="comment">
+              {renderComments()}
+        </div>
         </div>
       </div>
-      <h1 className='recommend-player-title'>Được đề xuất</h1>
-      <div className='recommend'>
-          {recommendedMovies.length === 0 ? (
-            <p>Đang tải phim gợi ý...</p>
-          ) : (
-            recommendedMovies.map((movie) => (
-              <VideoContent key={movie.id} movie={movie} />
-            ))
-          )}
+      <div className='recommend-player'>
+        <h1 className='recommend-player-title'>Được đề xuất</h1>
+        <div className='recommend'>
+            {recommendedMovies.length === 0 ? (
+              <p>Đang tải phim gợi ý...</p>
+            ) : (
+              recommendedMovies.map((movie) => (
+                <VideoContent key={movie.id} movie={movie} />
+              ))
+            )}
+        </div>
       </div>
     </div>
   );

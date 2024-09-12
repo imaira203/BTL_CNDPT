@@ -1,32 +1,90 @@
-import './category.css';
-import { useEffect, useState } from 'react';
-import VideoContent from '../../components/VideoContent'; // Import VideoContent
-import { useParams } from 'react-router-dom'; // Import useParams
-
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './profile.css'
 const API_URL = process.env.REACT_APP_API_URL;
 
-const categoryMap = {
-  action: 'Hành động',
-  drama: 'Drama',
-  comedy: 'Hài hước',
-  romance: 'Lãng mạn',
-  horror: 'Kinh dị',
-  detective: 'Trinh thám',
-  ancient: 'Cổ trang',
-  documentary: 'Phim tài liệu',
-  adventure: 'Phiêu lưu',
-  scifi: 'Khoa học - Viễn tưởng',
-  animation: 'Hoạt hình',
-  mythology: 'Thần thoại'
-};
-
-function Category() {
-  const { categoryName } = useParams(); // Get categoryName from URL parameters
+function Profile() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [actived, setActived] = useState('');
+  const [user, setUser] = useState([]);
   const [searchString, setSearchString] = useState('');
   const [userRole, setUserRole] = useState('');
-  const [movies, setMovies] = useState([]);
+  const [showPass, setShowPass] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [tabActive, setTabActive] = useState('info');
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    document.title = 'PhimHay - Tài khoản';
+  }, []);
+
+  
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role'); 
+    if (token) {
+      setLoggedIn(true);
+      setUserRole(role); 
+    } else {
+      setLoggedIn(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const savedActive = localStorage.getItem('active');
+    if (savedActive) {
+      setActived(savedActive);
+    } 
+    else {
+      setActived('home')
+    }
+  }, []);
+
+  useEffect(() => {
+    if (actived) {
+      localStorage.setItem('active', actived);
+    }
+  }, [actived]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+          const response = await fetch(`${API_URL}/getUser/${userId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          setUser(data.user);
+          console.log(user)
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleNavClick = (page) => {
+    setActived(page);
+  };
+
+  const handleTabClick = (tab) => {
+    setTabActive(tab)
+  }
+
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userId');
+    setLoggedIn(false);
+    setActived('home');
+  };
 
   const genres = [
     { name: 'Hành động', path: 'action' },
@@ -54,44 +112,8 @@ function Category() {
     { name: 'Ấn Độ', path: 'india' }
   ];
 
-  useEffect(() => {
-    document.title = `PhimHay - ${categoryMap[categoryName] || 'Danh mục không xác định'}`;
-    localStorage.setItem('active', 'thu-vien');
-  }, [categoryName]);
-
-  useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const response = await fetch(`${API_URL}/category/${categoryName}`);
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
-        }
-        const data = await response.json();
-        setMovies(data.data);
-      } catch (error) {
-        console.error('Error fetching movies:', error);
-      }
-    };
-    fetchMovies();
-  }, [categoryName]);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    if (token) {
-      setLoggedIn(true);
-      setUserRole(role);
-    } else {
-      setLoggedIn(false);
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userId');
-    setLoggedIn(false);
+  const togglePasswordVisibility = () => {
+    setShowPass(!showPass);
   };
 
   const SearchSubmit = (event) => {
@@ -103,29 +125,12 @@ function Category() {
     setSearchString(event.target.value);
   };
 
-  useEffect(() => {
-    const savedActive = localStorage.getItem('active');
-    if (savedActive) {
-      setActived(savedActive);
-    } else {
-      setActived('home');
-    }
-  }, []);
-
-  useEffect(() => {
-    if (actived) {
-      localStorage.setItem('active', actived);
-    }
-  }, [actived]);
-
-  const handleNavClick = (page) => {
-    setActived(page);
-  };
-
   return (
     <div className="main">
-      <div className="header">
-        <a href="/" className="logo" onClick={() => handleNavClick('home')}        >
+              <div className="header">
+        <a href="/" className="logo"
+           onClick={() => handleNavClick('home')}
+        >
           <i className='bx bxs-movie'>PhimHay</i>
         </a>
         <div className='bx bx-menu' id='menu-icon'></div>
@@ -221,22 +226,47 @@ function Category() {
           </a>
         )}
       </div>
-      <div className='body_home'>
-        <div className='category-container'>
-          <h1>Danh sách phim: {categoryMap[categoryName] || 'Danh mục không xác định'}</h1>
-          <div className='new-movie-container'>
-            {movies.length > 0 ? (
-              movies.map((movie) => (
-                <VideoContent key={movie.id} movie={movie} />
-              ))
-            ) : (
-              <p>Không tìm thấy phim nào</p>
-            )}
-          </div>
+      <div className="profile-page">
+      <div className='side-tab'>
+        <div
+        className={`hoso-item ${tabActive === 'info' ? 'active' : ''}`}
+        onClick={() => handleTabClick('info')}
+        >
+        Hồ sơ
         </div>
+        <div
+        className={`hoso-item ${tabActive === 'favorites' ? 'active' : ''}`}
+        onClick={() => handleTabClick('favorites')}
+        >
+        Phim đã thích
+        </div>
+    </div>
+       <div className="info">
+            {tabActive === 'info' ? (
+                user ? (
+                <div className="info-container">
+                    <p>Họ và Tên: {user.name}</p>
+                    <p>Email: {user.email}</p>
+                    <p>Tên tài khoản: {user.username}</p>
+                    <p className='change-password'><button>Đổi mật khẩu</button></p>
+                </div>
+                ) : (
+                <p>Loading...</p>
+                )
+            ) : (
+                <a href="/dang-nhap" className="btn">
+                Đăng nhập
+                </a>
+            )}
+            </div>
       </div>
+      {showPopup && (
+        <div className={`popup ${isSuccess ? 'success' : ''}`}>
+          <p>{popupMessage}</p>
+        </div>
+      )}
     </div>
   );
 }
 
-export default Category;
+export default Profile;

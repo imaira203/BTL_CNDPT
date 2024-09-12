@@ -9,6 +9,7 @@ import Category from './routes/category/category';
 import Country from './routes/country/country';
 import Library from './routes/library/library';
 import Player from './routes/player/player.js'; 
+import Profile from './routes/profile/profile.js'; 
 
 
 import './App.css';
@@ -24,6 +25,7 @@ function App() {
           <Route path="/category/:categoryName" element={<Category />} />
           <Route path="/country/:countryName" element={<Country />} />
           <Route path="/movie/:slug" element={<Player />} />
+          <Route path="/ho-so" element={<Profile />} />
           </Routes>
     </Router>
   );

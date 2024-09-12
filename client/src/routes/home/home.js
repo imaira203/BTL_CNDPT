@@ -257,7 +257,7 @@ function Home() {
             />
               <ul className="profile-dropdown">
                 <li>
-                  <a href="/profile">Hồ sơ</a>
+                  <a href="/ho-so">Hồ sơ</a>
                 </li>
                 {userRole === 'admin' && (
                   <li>
