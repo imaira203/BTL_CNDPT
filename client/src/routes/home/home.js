@@ -10,9 +10,9 @@ function Home() {
   const [actived, setActived] = useState('');
   const [searchString, setSearchString] = useState('');
   const [userRole, setUserRole] = useState('');
-
   const [recommendMovies, setRecommendMovies] = useState([]);
   const [topMovies, setTopMovies] = useState([]);
+  
   const [latestMovies, setLatestMovies] = useState([]);
 
   const [error, setError] = useState(null);
@@ -327,7 +327,8 @@ function Home() {
                     <i className='bx bx-play-circle' ></i>
                   </div>
                   <div className='content-container'>
-                    <div className={`title rank-${index + 1 }`}>{movie.name}</div>
+                    <div 
+                    className={`title rank-${index + 1 }`}>{movie.name}</div>
                     <div className='year'>{movie.release_year}</div>
                     <div className='icon'>
                       <i className='bx bx-bar-chart-alt'>{movie.totalViews} lượt xem</i>

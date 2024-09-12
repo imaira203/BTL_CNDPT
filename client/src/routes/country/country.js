@@ -1,4 +1,3 @@
-import './country.css';
 import { useEffect, useState } from 'react';
 import VideoContent from '../../components/VideoContent';
 import { useParams } from 'react-router-dom'; 

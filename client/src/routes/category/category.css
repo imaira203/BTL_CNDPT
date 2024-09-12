@@ -1,9 +1,19 @@
 .category-container {
-    height: 100vh;
+    height: 100%;
     width: 100%;
+    min-height: 89vh;
+    max-height: 89vh;
     display: flex;
     flex-direction: column;
     padding: 3em;
     gap: 2em;
     color: #fff;
 }
+
+.category-container .new-movie-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    overflow-x: auto;
+    width: 100%;
+}
+

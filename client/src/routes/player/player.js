@@ -395,10 +395,13 @@ function Player() {
               )}
             </div>
           </div>
-          <div className="comment">
-              <h1>Bình luận:</h1>
+        </main>
+        <div className='comment-box'>
+          <h1>Bình luận:</h1>
+        <div className="comment">
               {renderComments()}
-              {loggedIn && (
+        </div>
+        {loggedIn && (
                 <form onSubmit={handleCommentSubmit} className="comment-form">
                   <textarea
                     value={newComment}
@@ -406,13 +409,15 @@ function Player() {
                     placeholder="Nhập bình luận..."
                     required
                   />
-                  <button type="submit">Gửi bình luận</button>
+                  <button type="submit">
+                    <i class='bx bxs-send'></i>
+                  </button>
                 </form>
               )}
-          </div>
-        </main>
-        <div className='recommend'>
-          <h1>Được đề xuất</h1>
+        </div>
+      </div>
+      <h1 className='recommend-player-title'>Được đề xuất</h1>
+      <div className='recommend'>
           {recommendedMovies.length === 0 ? (
             <p>Đang tải phim gợi ý...</p>
           ) : (
@@ -420,7 +425,6 @@ function Player() {
               <VideoContent key={movie.id} movie={movie} />
             ))
           )}
-        </div>
       </div>
     </div>
   );

@@ -387,19 +387,18 @@ img {
     position: relative;
   }
   
-  @keyframes marquee {
-    0% {
-      transform: translateX(100%);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
+@keyframes marquee {
+0% {
+    transform: translateX(100%);
+}
+100% {
+    transform: translateX(-100%);
+}
+}
   
-  .marquee-active {
+.marquee-active {
     animation: marquee 7s linear infinite;
-  }  
-
+}  
 
 .movie-content .new-nation,
 .movie-content .new-title {
@@ -526,6 +525,7 @@ h2, h1 {
 .content-container {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .content-container .title {
