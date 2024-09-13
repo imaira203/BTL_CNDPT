@@ -9,11 +9,16 @@ function Profile() {
   const [user, setUser] = useState([]);
   const [searchString, setSearchString] = useState('');
   const [userRole, setUserRole] = useState('');
-  const [showPass, setShowPass] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [tabActive, setTabActive] = useState('info');
+  const [favoritedMovies, setFavoritedMovies] = useState([]);
+  const [showChangePassForm, setShowChangePassForm] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [newName, setNewDisplayName] = useState('');
+  const [showChangeNameForm, setShowChangeNameForm] = useState(false);
+
   const navigate = useNavigate();
 
 
@@ -60,7 +65,21 @@ function Profile() {
           }
           const data = await response.json();
           setUser(data.user);
-          console.log(user)
+
+          const favoritedMoviesResponse = await fetch(`${API_URL}/getMoviesByIds`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ids: data.user.favorited }), 
+          });
+
+          if (!favoritedMoviesResponse.ok) {
+            throw new Error(`HTTP error! Status: ${favoritedMoviesResponse.status}`);
+          }
+
+          const favoritedMoviesData = await favoritedMoviesResponse.json();
+          setFavoritedMovies(favoritedMoviesData.movies);
         }
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -76,6 +95,141 @@ function Profile() {
   const handleTabClick = (tab) => {
     setTabActive(tab)
   }
+
+  const toggleChangePassForm = () => {
+    setShowChangePassForm(!showChangePassForm);
+    setShowChangeNameForm(false);
+  }
+
+  const toggleChangeNameForm = () => {
+    setShowChangeNameForm(!showChangeNameForm);
+    setShowChangePassForm(false);
+  }
+
+
+  const handleChangeDisplayName = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      const response = await fetch(`${API_URL}/change-name`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, newName }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Đổi tên hiển thị thất bại');
+      }
+  
+      const data = await response.json();
+      if (data){
+        setPopupMessage('Đổi tên hiển thị thành công!');
+        setIsSuccess(true);
+        setShowPopup(true);
+    
+        setTimeout(() => {
+          setShowPopup(false);
+          setPopupMessage('');
+        }, 2000);
+    
+        setShowChangeNameForm(false);
+        setNewDisplayName('');
+        setUser((prevUser) => ({ ...prevUser, name: newName }));
+      } else {
+        setPopupMessage('Có lỗi xảy ra, vui lòng thử lại!');
+        setIsSuccess(true);
+        setShowPopup(true);
+    
+        setTimeout(() => {
+        setShowPopup(false);
+        setPopupMessage('');
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      setPopupMessage(`Error: ${error.message}`);
+      setIsSuccess(false);
+      setShowPopup(true);
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        setPopupMessage('');
+      }, 2000);
+    }
+  };
+
+  const handleChangePass = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      const response = await fetch(`${API_URL}/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, newPass: newPassword }), 
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Đổi mật khẩu thất bại');
+      }
+  
+      const data = await response.json();
+      console.log('Password updated successfully:', data);
+      setPopupMessage('Đổi mật khẩu thành công!');
+      setIsSuccess(true);
+      setShowPopup(true);
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        setPopupMessage(''); 
+      }, 2000);
+  
+      setShowChangePassForm(false);
+      setNewPassword('');
+    } catch (error) {
+      console.error('Error:', error.message);
+      setPopupMessage(`Error: ${error.message}`);
+      setIsSuccess(false);
+      setShowPopup(true);
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        setPopupMessage('');
+      }, 2000);
+    }
+  };
+  
+  const slugify = (text) => {
+    const charMap = {
+      'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+      'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+      'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+      'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+      'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+      'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+      'Đ': 'D', 'đ': 'd'
+    };
+  
+    const normalizedText = text
+      .split('')
+      .map(char => charMap[char] || char)
+      .join('');
+  
+    return normalizedText
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-') 
+      .replace(/^-+|-+$/g, ''); 
+  };
+
+  const handleMovieClick = (movieName) => {
+    const slug = slugify(movieName);
+    navigate(`/movie/${slug}`);
+  };
 
 
   const handleLogout = () => {
@@ -111,10 +265,6 @@ function Profile() {
     { name: 'Thái Lan', path: 'thailand' },
     { name: 'Ấn Độ', path: 'india' }
   ];
-
-  const togglePasswordVisibility = () => {
-    setShowPass(!showPass);
-  };
 
   const SearchSubmit = (event) => {
     event.preventDefault();
@@ -241,24 +391,54 @@ function Profile() {
         Phim đã thích
         </div>
     </div>
-       <div className="info">
-            {tabActive === 'info' ? (
-                user ? (
-                <div className="info-container">
-                    <p>Họ và Tên: {user.name}</p>
-                    <p>Email: {user.email}</p>
-                    <p>Tên tài khoản: {user.username}</p>
-                    <p className='change-password'><button>Đổi mật khẩu</button></p>
-                </div>
-                ) : (
-                <p>Loading...</p>
-                )
-            ) : (
-                <a href="/dang-nhap" className="btn">
-                Đăng nhập
-                </a>
-            )}
+    <div className="info">
+      {tabActive === 'info' ? (
+        user ? (
+          <div className="info-container">
+            <p>Tên hiển thị: {user.name}</p>
+            <p>Email: {user.email}</p>
+            <p>Tên tài khoản: {user.username}</p>
+            <p className="change-password">
+              <button onClick={toggleChangePassForm}>Đổi mật khẩu</button> 
+              <button onClick={toggleChangeNameForm}>Đổi tên hiển thị</button>
+            </p>
+            <div className={`change-pass ${showChangePassForm ? 'active' : ''}`}>
+              Mật khẩu mới: 
+              <input 
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <button onClick={handleChangePass}>Xác nhận</button>
             </div>
+            <div className={`change-pass ${showChangeNameForm ? 'active' : ''}`}>
+              Tên hiển thị mới: 
+              <input 
+                type="text"
+                value={newName}
+                onChange={(e) => setNewDisplayName(e.target.value)}
+              />
+              <button onClick={handleChangeDisplayName}>Xác nhận</button>
+            </div>
+          </div>
+        ) : (
+          <p>Loading...</p>
+        )
+      ) : (
+        <div className="favorites-container">
+          {favoritedMovies.length > 0 ? (
+            favoritedMovies.map((movie) => (
+              <div onClick={() => handleMovieClick(movie.name)} key={movie.id} className="movie-item">
+                <img src={movie.thumbnail_image} alt={movie.name} />
+                <p>{movie.name}</p>
+              </div>
+            ))
+          ) : (
+            <h1>Bạn chưa thích phim nào.</h1>
+          )}
+        </div>
+      )}
+    </div>
       </div>
       {showPopup && (
         <div className={`popup ${isSuccess ? 'success' : ''}`}>

@@ -17,6 +17,11 @@ function Player() {
   const [userDetails, setUserDetails] = useState([]);
   const [totalViews, setTotalViews] = useState(0);
   const [newComment, setNewComment] = useState('');
+  const [isFavorited, setIsFavorited] = useState(false); 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
+
 
   const genres = [
     { name: 'Hành động', path: 'action' },
@@ -55,13 +60,19 @@ function Player() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
+    const userId = localStorage.getItem('userId');
+
     if (token) {
       setLoggedIn(true);
       setUserRole(role);
+      if (movie) {
+        fetchUserFavorites(userId);
+      }
     } else {
       setLoggedIn(false);
     }
-  }, []);
+    // eslint-disable-next-line
+  }, [movie]);
 
   useEffect(() => {
     const fetchRandomMovies = async () => {
@@ -166,10 +177,6 @@ function Player() {
       .replace(/^-+|-+$/g, ''); 
   };
 
-  const handleLike = async() => {
-    
-  }
-
   const renderComments = () => {
     if (!movie || !movie.comments || movie.comments.length === 0) {
       return <h1 className='no-comment'>Chưa có bình luận.</h1>;
@@ -245,6 +252,68 @@ function Player() {
       setNewComment('');
     } catch (error) {
       console.error('Error posting comment:', error);
+    }
+  };
+
+  const fetchUserFavorites = async (userId) => {
+    try {
+      const response = await fetch(`${API_URL}/userFavorited/${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data)
+  
+      if (data && data.favorited && Array.isArray(data.favorited)) {
+        const userFavorites = data.favorited.map(fav => fav.id); 
+        if (userFavorites.includes(movie.id)) {
+          setIsFavorited(true);
+        } else {
+          setIsFavorited(false); 
+        }
+      } else {
+        console.warn('Unexpected data format:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching user favorites:', error);
+    }
+  };
+  
+
+  const handleFavoriteToggle = async () => {
+    const userId = localStorage.getItem('userId');
+    if (!userId || !movie) {
+      setPopupMessage('Vui lòng đăng nhập trước');
+      setIsSuccess(false);
+      setShowPopup(true);
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        setPopupMessage(''); 
+      }, 2000);
+    };
+
+    try {
+      const action = isFavorited ? 'remove' : 'add';
+      const response = await fetch(`${API_URL}/update-favorites`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          movieId: movie.id,
+          action,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      setIsFavorited(!isFavorited);
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
     }
   };
 
@@ -393,8 +462,9 @@ function Player() {
               ) : (
                 <>
                   <h2>{movie.name}</h2>
-                  <button className='like-btn' onClick={handleLike}>
-                    <i class='bx bxs-heart'></i> Yêu thích
+                  <button className='like-btn' onClick={handleFavoriteToggle}>
+                    <i className={`bx ${isFavorited ? 'bxs-heart' : 'bx-heart'}`}></i> 
+                    {isFavorited ? 'Đã thích' : 'Yêu thích'}
                   </button>
                   <p><strong>Số tập:</strong> {movie.chapter.length}</p>
                   <p><strong>Thể loại:</strong> {Array.isArray(movie.category) ? movie.category.join(', ') : movie.category}</p>
@@ -417,7 +487,7 @@ function Player() {
                     required
                   />
                   <button type="submit">
-                    <i class='bx bxs-send'></i>
+                    <i className='bx bxs-send'></i>
                   </button>
                 </form>
           )}
@@ -438,6 +508,11 @@ function Player() {
             )}
         </div>
       </div>
+      {showPopup && (
+        <div className={`popup-player ${isSuccess ? 'success' : ''}`}>
+          <p>{popupMessage}</p>
+        </div>
+      )}
     </div>
   );
 }

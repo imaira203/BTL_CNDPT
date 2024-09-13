@@ -117,13 +117,11 @@ app.get('/api/category/:categoryName', async (req, res) => {
         .ilike('category', `%${vietnameseCategory}%`);
   
       if (error) {
-        console.error('Database query error:', error);
         return res.status(500).json({ error: error.message });
       }
   
       res.status(200).json({ data: movies });
     } catch (err) {
-      console.error('Server error:', err);
       res.status(500).json({ error: err.message });
     }
   });
@@ -143,13 +141,11 @@ app.get('/api/category/:categoryName', async (req, res) => {
         .ilike('nation', `%${vietnameseCountry}%`);
   
       if (error) {
-        console.error('Database query error:', error);
         return res.status(500).json({ error: error.message });
       }
   
       res.status(200).json({ data: movies });
     } catch (err) {
-      console.error('Server error:', err);
       res.status(500).json({ error: err.message });
     }
   });  
@@ -181,7 +177,6 @@ app.get('/api/category/:categoryName', async (req, res) => {
 
                 totalViews = chapters.reduce((sum, chapter) => sum + parseInt(chapter.views, 10), 0);
             } catch (e) {
-                console.error(`Failed to parse chapter field for movie ID ${movie.id}:`, e);
                 return {
                     ...movie,
                     totalViews: 0
@@ -200,7 +195,6 @@ app.get('/api/category/:categoryName', async (req, res) => {
 
         res.status(200).json({ data: topMovies });
     } catch (err) {
-        console.error('Server error:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -218,7 +212,6 @@ app.get('/api/getRecommend', async (req, res) => {
         }
         res.status(200).json({ data: movies });
     } catch (error) {
-        console.error('Error fetching recommended movies:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -242,7 +235,6 @@ app.get('/api/latest-movies', async (req, res) => {
 
         res.status(200).json({ data: categorizedMovies });
     } catch (error) {
-        console.error('Error fetching latest movies:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -270,7 +262,6 @@ app.get('/api/getMovie/:id', async (req, res) => {
         res.status(404).json({ message: 'Movie not found' });
       }
     } catch (error) {
-      console.error('Error:', error.message);
       res.status(500).json({ message: error.message });
     }
   });
@@ -286,7 +277,28 @@ app.get('/api/users', async (req, res) => {
     }
     res.status(200).json({ users: data });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/api/userFavorited/:id', async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const { data, error } = await db
+      .from('accounts')
+      .select('id, name, favorited')
+      .eq('id', userId);
+
+    if (error) {
+      throw error;
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json(data[0]);
+  } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -324,10 +336,67 @@ app.post('/api/post-comment', async (req, res) => {
 
     res.status(200).json({ comment: { user: id, comment }, ...updatedMovie });
   } catch (error) {
-    console.error('Error posting comment:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });  
+
+app.post('/api/change-name', async (req, res) => {
+  const { userId, newName } = req.body; 
+
+  if (!userId || !newName) {
+    return res.status(400).json({ message: 'User ID and new password are required' });
+  }
+
+  try {
+    const { data, error } = await db
+      .from('accounts')
+      .update({ name: newName }) 
+      .eq('id', userId) 
+      .select('*')
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data) {
+      res.json({ message: 'Name updated successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/api/change-password', async (req, res) => {
+  const { userId, newPass } = req.body; 
+
+  if (!userId || !newPass) {
+    return res.status(400).json({ message: 'User ID and new password are required' });
+  }
+
+  try {
+    const { data, error } = await db
+      .from('accounts')
+      .update({ password: newPass }) 
+      .eq('id', userId) 
+      .select('*')
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data) {
+      res.json({ message: 'Password updated successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 app.get('/api/getUser/:id', async (req, res) => {
   const userId = req.params.id;
@@ -339,7 +408,6 @@ app.get('/api/getUser/:id', async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Error fetching data from Supabase:', error);
       throw error;
     }
 
@@ -349,10 +417,64 @@ app.get('/api/getUser/:id', async (req, res) => {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
-    console.error('Error:', error.message);
     res.status(500).json({ message: error.message });
   }
 });
+
+app.post('/api/update-favorites', async (req, res) => {
+  const { userId, movieId, action } = req.body;
+
+  try {
+    const { data: user } = await db
+      .from('accounts')
+      .select('favorited')
+      .eq('id', userId)
+      .single();
+
+    let updatedFavorites = user.favorited || [];
+
+    if (action === 'add') {
+      updatedFavorites.push({ id: movieId });
+    } else if (action === 'remove') {
+      updatedFavorites = updatedFavorites.filter(fav => fav.id !== movieId);
+    }
+
+    const { data, error } = await db
+      .from('accounts')
+      .update({ favorited: updatedFavorites })
+      .eq('id', userId);
+
+    if (error) throw error;
+
+    res.json({ message: 'Favorites updated successfully', favorited: updatedFavorites });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/api/getMoviesByIds', async (req, res) => {
+  const { ids } = req.body;
+  
+  if (!ids || ids.length === 0) {
+    return res.status(400).json({ error: 'No movie IDs provided' });
+  }
+
+  try {    
+    const numericIds = ids.map(item => item.id);
+    const { data: movies, error } = await db
+      .from('movies')
+      .select('*')
+      .in('id', numericIds); 
+
+    if (error) {
+      return res.status(500).json({ error: 'Error fetching movies', details: error.message });
+    }
+    return res.status(200).json({ movies });
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
   
 const port = 81;
 app.listen(port, () => {
