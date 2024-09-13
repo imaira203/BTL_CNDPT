@@ -238,6 +238,14 @@ function Home() {
               ))}
             </ul>
           </li>
+          <li>
+            <a 
+              href='/thanh-vien' 
+              className={actived === 'thanh-vien' ? 'active' : ''} 
+            >
+              Thành viên
+            </a>
+          </li>
         </ul>
         <form onSubmit={SearchSubmit} className='search-bar'>
           <input 
