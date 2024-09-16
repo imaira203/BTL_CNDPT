@@ -29,7 +29,6 @@ function Player() {
 
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -83,6 +82,8 @@ function Player() {
     } else {
       document.title = `PhimHay - xem phim miễn phí`;
     }
+    setSearchString('');
+    setSearchResults([]);
   }, [movie]);  
 
   useEffect(() => {
