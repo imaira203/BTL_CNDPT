@@ -18,6 +18,11 @@ function Profile() {
   const [newPassword, setNewPassword] = useState('');
   const [newName, setNewDisplayName] = useState('');
   const [showChangeNameForm, setShowChangeNameForm] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [latestMovies, setLatestMovies] = useState([]);
+
+  // eslint-disable-next-line
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -119,8 +124,9 @@ function Profile() {
       });
   
       if (!response.ok) {
+        // eslint-disable-next-line
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Đổi tên hiển thị thất bại');
+        throw new Error('Đổi tên hiển thị thất bại');
       }
   
       const data = await response.json();
@@ -148,8 +154,7 @@ function Profile() {
         }, 2000);
       }
     } catch (error) {
-      console.error('Error:', error.message);
-      setPopupMessage(`Error: ${error.message}`);
+      setPopupMessage(`${error.message}`);
       setIsSuccess(false);
       setShowPopup(true);
   
@@ -172,12 +177,10 @@ function Profile() {
       });
   
       if (!response.ok) {
+        // eslint-disable-next-line
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Đổi mật khẩu thất bại');
+        throw new Error('Đổi mật khẩu thất bại');
       }
-  
-      const data = await response.json();
-      console.log('Password updated successfully:', data);
       setPopupMessage('Đổi mật khẩu thành công!');
       setIsSuccess(true);
       setShowPopup(true);
@@ -190,8 +193,7 @@ function Profile() {
       setShowChangePassForm(false);
       setNewPassword('');
     } catch (error) {
-      console.error('Error:', error.message);
-      setPopupMessage(`Error: ${error.message}`);
+      setPopupMessage(`${error.message}`);
       setIsSuccess(false);
       setShowPopup(true);
   
@@ -201,6 +203,24 @@ function Profile() {
       }, 2000);
     }
   };
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const latestMoviesResponse = await fetch(`${API_URL}/latest-movies`);
+        if (!latestMoviesResponse.ok) {
+          const errorText = await latestMoviesResponse.text();
+          throw new Error(`HTTP error! Status: ${latestMoviesResponse.status}, Message: ${errorText}`);
+        }
+        const latestMoviesData = await latestMoviesResponse.json();
+        setLatestMovies(latestMoviesData.data.all); 
+      } catch (error) {
+        console.error('Error fetching movies:', error);
+        setError(error.message);
+      }
+    };
+    fetchMovies();
+  }, []);
   
   const slugify = (text) => {
     const charMap = {
@@ -256,23 +276,30 @@ function Profile() {
   ];
 
   const countries = [
-    { name: 'Việt Nam', path: 'vietnam' },
+    { name: 'Úc', path: 'australia' },
+    { name: 'Nga', path: 'Russia' },
+    { name: 'Canada', path: 'Canada' },
     { name: 'Hoa Kỳ', path: 'usa' },
     { name: 'Anh', path: 'uk' },
     { name: 'Nhật Bản', path: 'japan' },
     { name: 'Hàn Quốc', path: 'south-korea' },
     { name: 'Trung Quốc', path: 'china' },
     { name: 'Thái Lan', path: 'thailand' },
-    { name: 'Ấn Độ', path: 'india' }
+    { name: 'Ý', path: 'italia' },
   ];
 
-  const SearchSubmit = (event) => {
-    event.preventDefault();
-    console.log(searchString);
-  };
-
   const SearchChange = (event) => {
-    setSearchString(event.target.value);
+    const query = event.target.value;
+    setSearchString(query);
+    
+    if (query) {
+      const filteredMovies = [...latestMovies].filter(movie =>
+        movie.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(filteredMovies);
+    } else {
+      setSearchResults([]);
+    }
   };
 
   return (
@@ -338,7 +365,7 @@ function Profile() {
             </ul>
           </li>
         </ul>
-        <form onSubmit={SearchSubmit} className='search-bar'>
+        <form className='search-bar'>
           <input 
             className='search' 
             placeholder='Tìm kiếm...' 
@@ -346,6 +373,20 @@ function Profile() {
             onChange={SearchChange} 
           />
           <button type='submit' style={{ display: 'none' }}>Submit</button>
+          <div 
+            className={`search-results ${searchResults.length > 0 ? 'visible' : ''}`} 
+          >
+            {searchResults.slice(0, 10).map((movie) => (
+              <div 
+                key={movie.id}
+                className='search-result-item'
+                onClick={() => handleMovieClick(movie.name)}
+              >
+                <img src={movie.thumbnail_image} alt={movie.name} />
+                <p>{movie.name}</p>
+              </div>
+            ))}
+          </div>
         </form>
         {loggedIn ? (
           <div className="profile-container">

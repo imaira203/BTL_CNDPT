@@ -220,6 +220,13 @@
     transition: transform 0.5s ease;
 }
 
+.like-amount .bx.bxs-heart {
+    font-size: 0.7em;
+    scale: 1.4;
+    margin-left: 0.3em;
+    margin-right: 0.4em;
+}
+
 .like-btn .bx.bx-heart,
 .like-btn .bx.bxs-heart {
     font-size: 1.4em;

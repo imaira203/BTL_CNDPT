@@ -26,14 +26,16 @@ function generateToken() {
   
   
   const countryMapping = {
-    'vietnam': 'Việt Nam',
+    'australia': 'Úc',
     'usa': 'Hoa Kỳ',
     'uk': 'Anh',
     'japan': 'Nhật Bản',
     'south-korea': 'Hàn Quốc',
     'china': 'Trung Quốc',
     'thailand': 'Thái Lan',
-    'india': 'Ấn Độ'
+    'russia': 'Nga',
+    'italia': 'Ý',
+    'canada': 'canada'
   };
 
 const app = express();
@@ -431,12 +433,28 @@ app.post('/api/update-favorites', async (req, res) => {
       .eq('id', userId)
       .single();
 
+      const { data: movieData } = await db
+      .from('movies')
+      .select('likes')
+      .eq('id', movieId)
+      .single();
+
     let updatedFavorites = user.favorited || [];
+
+    const currentLike = movieData?.likes || 0;
 
     if (action === 'add') {
       updatedFavorites.push({ id: movieId });
+      await db
+        .from('movies')
+        .update({ likes: currentLike + 1 })
+        .eq('id', movieId);
     } else if (action === 'remove') {
       updatedFavorites = updatedFavorites.filter(fav => fav.id !== movieId);
+      await db
+        .from('movies')
+        .update({ likes: currentLike - 1 })
+        .eq('id', movieId);
     }
 
     const { data, error } = await db
@@ -449,6 +467,7 @@ app.post('/api/update-favorites', async (req, res) => {
     res.json({ message: 'Favorites updated successfully', favorited: updatedFavorites });
   } catch (error) {
     res.status(500).json({ message: error.message });
+    console.log(error)
   }
 });
 
@@ -475,6 +494,59 @@ app.post('/api/getMoviesByIds', async (req, res) => {
   }
 });
 
+app.post('/api/update-view', async (req, res) => {
+  const { movieId, chapter } = req.body;
+
+  try {
+    let { data: movie, error } = await db
+      .from('movies')
+      .select('chapter')
+      .eq('id', movieId)
+      .single();
+
+    if (error || !movie) throw error || new Error('Movie not found');
+
+    const updatedChapter = movie.chapter.map(chap => {
+      if (chap.chap === chapter) {
+        return {
+          ...chap,
+          views: (parseInt(chap.views) + 1).toString() 
+        };
+      }
+      return chap;
+    });
+    const { data, updateError } = await db
+      .from('movies')
+      .update({ chapter: updatedChapter })
+      .eq('id', movieId)
+      .select()
+
+    if (updateError) throw updateError;
+
+    res.status(200).send({ success: true, data: data});
+  } catch (err) {
+    res.status(500).send({ success: false, error: err.message });
+    console.log(err)
+  }
+});
+
+app.post('/api/search', async (req, res) => {
+  const { query } = req.body; 
+  try {
+    const { data, error } = await db
+      .from('movies')
+      .select('*')
+      .ilike('name', `%${query}%`);
+
+    if (error) {
+      throw error;
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching movies:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
   
 const port = 81;
 app.listen(port, () => {

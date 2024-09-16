@@ -1,9 +1,18 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function VideoContent({ movie }) {
   const titleRef = useRef(null);
+  const [isMarquee, setIsMarquee] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (titleRef.current) {
+      setIsMarquee(checkMarquee());
+      window.addEventListener('resize', () => setIsMarquee(checkMarquee()));
+      return () => window.removeEventListener('resize', () => setIsMarquee(checkMarquee()));
+    }
+  }, [movie.name]); 
 
   const slugify = (text) => {
     const charMap = {
@@ -47,7 +56,7 @@ function VideoContent({ movie }) {
       </div>
       <div
         ref={titleRef}
-        className={`new-title ${checkMarquee() ? 'marquee-active' : ''}`}
+        className={`new-title ${isMarquee ? 'marquee-active' : ''}`}
       >
         {movie.name}
       </div>

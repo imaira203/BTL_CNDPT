@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import VideoContent from '../../components/VideoContent'; 
 import './player.css';
 
@@ -21,7 +21,32 @@ function Player() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [latestMovies, setLatestMovies] = useState([]);
 
+  // eslint-disable-next-line
+  const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const latestMoviesResponse = await fetch(`${API_URL}/latest-movies`);
+        if (!latestMoviesResponse.ok) {
+          const errorText = await latestMoviesResponse.text();
+          throw new Error(`HTTP error! Status: ${latestMoviesResponse.status}, Message: ${errorText}`);
+        }
+        const latestMoviesData = await latestMoviesResponse.json();
+        setLatestMovies(latestMoviesData.data.all); 
+      } catch (error) {
+        console.error('Error fetching movies:', error);
+        setError(error.message);
+      }
+    };
+    fetchMovies();
+  }, []);
 
   const genres = [
     { name: 'Hành động', path: 'action' },
@@ -39,14 +64,17 @@ function Player() {
   ];
 
   const countries = [
-    { name: 'Việt Nam', path: 'vietnam' },
+    { name: 'Úc', path: 'australia' },
+    { name: 'Nga', path: 'Russia' },
+    { name: 'Canada', path: 'Canada' },
     { name: 'Hoa Kỳ', path: 'usa' },
     { name: 'Anh', path: 'uk' },
     { name: 'Nhật Bản', path: 'japan' },
     { name: 'Hàn Quốc', path: 'south-korea' },
     { name: 'Trung Quốc', path: 'china' },
     { name: 'Thái Lan', path: 'thailand' },
-    { name: 'Ấn Độ', path: 'india' }
+    { name: 'Ý', path: 'italia' },
+
   ];
   
   useEffect(() => {
@@ -123,6 +151,7 @@ function Player() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log(data)
         setMovie(data);
         if (data.chapter.length > 0) {
           setSelectedChapter(data.chapter[0]);
@@ -152,6 +181,38 @@ function Player() {
     };
     fetchUserDetails();
   }, [slug]);
+
+  useEffect(() => {
+    if (selectedChapter) {
+      const updateChapterView = async() => {
+        try {
+          const response = await fetch(`${API_URL}/update-view`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              movieId: movie.id,  
+              chapter: selectedChapter.chap, 
+            }),
+          });
+  
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+        } catch (error) {
+          console.error('Error updating chapter views:', error);
+        }
+      };
+      updateChapterView();
+    }
+  }, [selectedChapter, movie]);
+  
+  
+  const handleMovieClick = (movieName) => {
+    const slug = slugify(movieName);
+    navigate(`/movie/${slug}`);
+  };
 
   const slugify = (text) => {
     const charMap = {
@@ -206,13 +267,18 @@ function Player() {
     setActived(page);
   };
 
-  const SearchSubmit = (event) => {
-    event.preventDefault();
-    console.log(searchString);
-  };
-
   const SearchChange = (event) => {
-    setSearchString(event.target.value);
+    const query = event.target.value;
+    setSearchString(query);
+    
+    if (query) {
+      const filteredMovies = [...latestMovies].filter(movie =>
+        movie.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(filteredMovies);
+    } else {
+      setSearchResults([]);
+    }
   };
 
   const handleLogout = () => {
@@ -310,12 +376,13 @@ function Player() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       setIsFavorited(!isFavorited);
+      action === 'remove' ? movie.likes -= 1 : movie.likes += 1;
     } catch (error) {
       console.error('Error updating favorite status:', error);
     }
   };
+  
 
   const isLoading = !movie;
 
@@ -380,14 +447,28 @@ function Player() {
           </li>
         </ul>
 
-        <form onSubmit={SearchSubmit} className="search-bar">
-          <input
-            className="search"
-            placeholder="Tìm kiếm..."
+        <form className='search-bar'>
+          <input 
+            className='search' 
+            placeholder='Tìm kiếm...' 
             value={searchString}
-            onChange={SearchChange}
+            onChange={SearchChange} 
           />
-          <button type="submit" style={{ display: 'none' }}>Submit</button>
+          <button type='submit' style={{ display: 'none' }}>Submit</button>
+          <div 
+            className={`search-results ${searchResults.length > 0 ? 'visible' : ''}`} 
+          >
+            {searchResults.slice(0, 10).map((movie) => (
+              <div 
+                key={movie.id}
+                className='search-result-item'
+                onClick={() => handleMovieClick(movie.name)}
+              >
+                <img src={movie.thumbnail_image} alt={movie.name} />
+                <p>{movie.name}</p>
+              </div>
+            ))}
+          </div>
         </form>
         {loggedIn ? (
           <div className="profile-container">
@@ -436,6 +517,7 @@ function Player() {
                 <li>Đang tải...</li>
               </ul>
             ) : (
+              <>
               <ul>
                 {movie.chapter.map((chap, index) => (
                   <li key={index}>
@@ -448,6 +530,8 @@ function Player() {
                   </li>
                 ))}
               </ul>
+              <p><strong>{movie.theloai === "Phim bộ" ? `Số lượt xem tập ${selectedChapter.chap}: ${selectedChapter.views}` : `Số lượt xem: ${selectedChapter.views}`}</strong></p>
+              </>
             )}
           </div>
           <div className='movie-info'>
@@ -466,6 +550,7 @@ function Player() {
                     <i className={`bx ${isFavorited ? 'bxs-heart' : 'bx-heart'}`}></i> 
                     {isFavorited ? 'Đã thích' : 'Yêu thích'}
                   </button>
+                  <p className='like-amount'><strong>Số lượt thích: <i className={`bx bxs-heart`}></i></strong>{movie.likes}</p>
                   <p><strong>Số tập:</strong> {movie.chapter.length}</p>
                   <p><strong>Thể loại:</strong> {Array.isArray(movie.category) ? movie.category.join(', ') : movie.category}</p>
                   <p><strong>Diễn viên:</strong> {movie.actors}</p>

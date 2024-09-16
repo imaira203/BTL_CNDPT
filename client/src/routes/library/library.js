@@ -1,7 +1,8 @@
 import './library.css';
 
 import { useEffect, useState } from 'react';
-import VideoContent from '../../components/VideoContent'; // Import VideoContent
+import VideoContent from '../../components/VideoContent';
+import {useNavigate} from 'react-router-dom';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -12,6 +13,13 @@ function Library() {
   const [searchString, setSearchString] = useState('');
   const [userRole, setUserRole] = useState('');
   const [latestMovies, setLatestMovies] = useState([]);
+
+  // eslint-disable-next-line
+  const [error, setError] = useState(null);
+
+  const [searchResults, setSearchResults] = useState([]);
+  const navigate = useNavigate();
+
 
   //eslint-disable-next-line
   let [selectedType] = useState('');
@@ -56,6 +64,36 @@ function Library() {
     setLoggedIn(false);
   };
 
+  const slugify = (text) => {
+    const charMap = {
+      'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+      'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+      'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+      'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+      'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+      'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+      'Đ': 'D', 'đ': 'd'
+    };
+  
+    const normalizedText = text
+      .split('')
+      .map(char => charMap[char] || char)
+      .join('');
+  
+    return normalizedText
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-') 
+      .replace(/^-+|-+$/g, ''); 
+  };
+
+  
+  const handleMovieClick = (movieName) => {
+    const slug = slugify(movieName);
+    navigate(`/movie/${slug}`);
+  };
+
   const genres = [
     { name: 'Hành động', path: 'action' },
     { name: 'Drama', path: 'drama' },
@@ -72,24 +110,30 @@ function Library() {
   ];
 
   const countries = [
-    { name: 'Việt Nam', path: 'vietnam' },
+    { name: 'Úc', path: 'australia' },
+    { name: 'Nga', path: 'Russia' },
+    { name: 'Canada', path: 'Canada' },
     { name: 'Hoa Kỳ', path: 'usa' },
     { name: 'Anh', path: 'uk' },
     { name: 'Nhật Bản', path: 'japan' },
     { name: 'Hàn Quốc', path: 'south-korea' },
     { name: 'Trung Quốc', path: 'china' },
     { name: 'Thái Lan', path: 'thailand' },
-    { name: 'Ấn Độ', path: 'india' }
+    { name: 'Ý', path: 'italia' },
   ];
 
-
-  const SearchSubmit = (event) => {
-    event.preventDefault();
-    console.log(searchString);
-  };
-
   const SearchChange = (event) => {
-    setSearchString(event.target.value);
+    const query = event.target.value;
+    setSearchString(query);
+    
+    if (query) {
+      const filteredMovies = [...latestMovies].filter(movie =>
+        movie.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(filteredMovies);
+    } else {
+      setSearchResults([]);
+    }
   };
 
   useEffect(() => {
@@ -174,7 +218,7 @@ function Library() {
             </ul>
           </li>
         </ul>
-        <form onSubmit={SearchSubmit} className='search-bar'>
+        <form className='search-bar'>
           <input 
             className='search' 
             placeholder='Tìm kiếm...' 
@@ -182,6 +226,20 @@ function Library() {
             onChange={SearchChange} 
           />
           <button type='submit' style={{ display: 'none' }}>Submit</button>
+          <div 
+            className={`search-results ${searchResults.length > 0 ? 'visible' : ''}`} 
+          >
+            {searchResults.slice(0, 10).map((movie) => (
+              <div 
+                key={movie.id}
+                className='search-result-item'
+                onClick={() => handleMovieClick(movie.name)}
+              >
+                <img src={movie.thumbnail_image} alt={movie.name} />
+                <p>{movie.name}</p>
+              </div>
+            ))}
+          </div>
         </form>
         {loggedIn ? (
           <div className="profile-container">

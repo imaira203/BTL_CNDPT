@@ -17,6 +17,9 @@ function Home() {
 
   const [error, setError] = useState(null);
   const [selectedType, setSelectedType] = useState('all');
+  const [searchResults, setSearchResults] = useState([]);
+  
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,27 +86,34 @@ function Home() {
   ];
 
   const countries = [
-    { name: 'Việt Nam', path: 'vietnam' },
+    { name: 'Úc', path: 'australia' },
+    { name: 'Nga', path: 'Russia' },
+    { name: 'Canada', path: 'Canada' },
     { name: 'Hoa Kỳ', path: 'usa' },
     { name: 'Anh', path: 'uk' },
     { name: 'Nhật Bản', path: 'japan' },
     { name: 'Hàn Quốc', path: 'south-korea' },
     { name: 'Trung Quốc', path: 'china' },
     { name: 'Thái Lan', path: 'thailand' },
-    { name: 'Ấn Độ', path: 'india' }
+    { name: 'Ý', path: 'italia' },
   ];
 
   const handleTypeClick = (type) => {
     setSelectedType(type);
   };
 
-  const SearchSubmit = (event) => {
-    event.preventDefault();
-    console.log(searchString);
-  };
-
   const SearchChange = (event) => {
-    setSearchString(event.target.value);
+    const query = event.target.value;
+    setSearchString(query);
+    
+    if (query) {
+      const filteredMovies = [...latestMovies].filter(movie =>
+        movie.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(filteredMovies);
+    } else {
+      setSearchResults([]);
+    }
   };
 
   const handleMovieClick = (movieName) => {
@@ -247,7 +257,7 @@ function Home() {
             </a>
           </li>
         </ul>
-        <form onSubmit={SearchSubmit} className='search-bar'>
+        <form className='search-bar'>
           <input 
             className='search' 
             placeholder='Tìm kiếm...' 
@@ -255,6 +265,20 @@ function Home() {
             onChange={SearchChange} 
           />
           <button type='submit' style={{ display: 'none' }}>Submit</button>
+          <div 
+            className={`search-results ${searchResults.length > 0 ? 'visible' : ''}`} 
+          >
+            {searchResults.slice(0, 10).map((movie) => (
+              <div 
+                key={movie.id}
+                className='search-result-item'
+                onClick={() => handleMovieClick(movie.name)}
+              >
+                <img src={movie.thumbnail_image} alt={movie.name} />
+                <p>{movie.name}</p>
+              </div>
+            ))}
+          </div>
         </form>
         {loggedIn ? (
           <div className="profile-container">
