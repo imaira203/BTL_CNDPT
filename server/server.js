@@ -441,7 +441,7 @@ app.post('/api/update-favorites', async (req, res) => {
 
     let updatedFavorites = user.favorited || [];
 
-    const currentLike = movieData?.likes || 0;
+    const currentLike = (movieData && movieData.likes) ? movieData.likes : 0;
 
     if (action === 'add') {
       updatedFavorites.push({ id: movieId });
