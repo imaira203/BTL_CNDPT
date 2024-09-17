@@ -29,6 +29,7 @@ function Profile() {
 
   useEffect(() => {
     document.title = 'PhimHay - Tài khoản';
+    localStorage.setItem('active', '');
   }, []);
 
   
@@ -363,6 +364,15 @@ function Profile() {
                 </li>
               ))}
             </ul>
+          </li>
+          <li>
+            <a 
+              href='/thanh-vien' 
+              className={actived === 'thanh-vien' ? 'active' : ''} 
+              onClick={() => handleNavClick('thanh-vien')}
+            >
+              Thành viên
+            </a>
           </li>
         </ul>
         <form className='search-bar'>

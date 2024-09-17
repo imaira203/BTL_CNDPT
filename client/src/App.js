@@ -10,6 +10,7 @@ import Country from './routes/country/country';
 import Library from './routes/library/library';
 import Player from './routes/player/player.js'; 
 import Profile from './routes/profile/profile.js'; 
+import Member from './routes/member/member.js';
 
 import './App.css';
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/country/:countryName" element={<Country />} />
           <Route path="/movie/:slug" element={<Player />} />
           <Route path="/ho-so" element={<Profile />} />
+          <Route path="/thanh-vien" element={<Member />} />
           </Routes>
     </Router>
   );
