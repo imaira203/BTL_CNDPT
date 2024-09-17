@@ -267,8 +267,13 @@ li:hover::after,
     border-radius: 8px;
     display: block; 
     overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.8s ease;
 }
 
+.body_home .recommend img:hover {
+    transform: scale(1.1);
+}
 .body_home .main-page {
     padding: 0.8em;
     width: 100%;

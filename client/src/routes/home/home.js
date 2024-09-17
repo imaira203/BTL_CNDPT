@@ -313,7 +313,7 @@ function Home() {
       <div className='body_home'>
         <div className='recommend'>
           {recommendMovies.map((movie) => (
-            <img key={movie.id} src={movie.thumbnail} alt={movie.name} />
+            <img key={movie.id} src={movie.thumbnail} alt={movie.name} onClick={() => handleMovieClick(movie.name)}/>
           ))}
         </div>
         <div className='main-page'>
