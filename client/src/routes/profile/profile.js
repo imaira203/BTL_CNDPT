@@ -485,7 +485,7 @@ function Profile() {
               </div>
             ))
           ) : (
-            <h1>Bạn chưa thích phim nào.</h1>
+            <h2>Chưa có phim yêu thích</h2>
           )}
         </div>
       )}
