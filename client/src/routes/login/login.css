@@ -31,12 +31,13 @@ input.password {
     padding-left: 30px;
 }
 
+.otp-container,
 .username-container,
 .password-container {
     position: relative;
     width: 70%;
 }
-  
+
 .username,
 .password {
     width: 100%;
@@ -44,13 +45,53 @@ input.password {
     padding-left: 40px;
 }
 
+.bi.bi-asterisk,
 .bi.bi-lock,
 .bi.bi-person {
     position: absolute;
-    top: 30%;
+    top: 31%;
     left: 10px;
 }
-  
+ 
+.sendOTP {
+    position: absolute;
+    right: 0px;
+    top: 0;
+    cursor: pointer;
+    width: 40%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #104781c9;
+    background-color: rgba(17, 87, 130, 0.807);
+    border-radius: 15px;
+    color: rgba(214, 214, 214, 0.875);
+    font-weight: 600;
+    gap: 0.3em;
+    transition: transform 0.4s ease;
+}
+
+.sendOTP:hover {
+    transform: scale(1.1);
+    background-color: rgb(47, 101, 134);
+}
+
+.sendOTP.disabled {
+    cursor: wait;
+    opacity: 0.6; 
+}
+
+.sendOTP.disabled:hover {
+    transform: none;
+}
+
+.bx.bx-mail-send {
+    font-size: 1.8em;
+    color: rgba(214, 214, 214, 0.804);
+    font-weight: 600;
+}
+
 .eye-icon {
     position: absolute;
     right: 10px;

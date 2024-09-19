@@ -1,14 +1,18 @@
 // server/server.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
-function generateToken() {
-    return crypto.randomBytes(32).toString('hex');
+  function generateToken() {
+      return crypto.randomBytes(32).toString('hex');
   }
-
+  function generateOTP() {
+      return crypto.randomInt(100000, 999999).toString();
+  }
   const categoryMapping = {
     'action': 'Hành động',
     'drama': 'Drama',
@@ -52,23 +56,110 @@ if (db) {
     console.log("Error connecting to Supabase DB");
 }
 
-app.post('/api/register', async (req, res) => {
-    const { username, password, name, email } = req.body;
-    const token = generateToken();
-    try {
-        const { data: accountData, error: accountError } = await db
-            .from('accounts')
-            .insert([{ username, password, name, email, token }])
-            .select();
-
-        if (accountError) {
-            return res.status(500).json({message: 'Username was already taken', error: accountError.message });
-        }
-        res.status(200).json({ message: 'User registered successfully', data: accountData });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false 
+  }
 });
+
+app.post('/api/send-otp', async (req, res) => {
+  const { email, username } = req.body;
+
+  if (!email || !username) {
+    return res.status(400).json({ error: 'Email and username are required' });
+  }
+
+  const otp = generateOTP();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
+
+  try {
+    const { data: existingOtp, error: existingOtpError } = await db
+      .from('otps')
+      .select('*')
+      .eq('username', username)
+      .single();
+
+    if (existingOtp) {
+      await db
+        .from('otps')
+        .update({ otp, expires_at: expiresAt })
+        .eq('id', existingOtp.id);
+    } else {
+      await db
+        .from('otps')
+        .insert([{ email, username, otp, expires_at: expiresAt }]);
+    }
+
+    const mailOptions = {
+      from: `"Xác thực OTP" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Xác thực OTP đăng kí tài khoản mới',
+      html: `
+        <div>
+          <a style="font-size: 28px;">Mã xác minh của bạn là: </a> 
+          <strong style="font-size: 32px; margin-bottom: 10px;">${otp}</strong><br>
+          <em style="font-size: 16px;">Mã OTP có hiệu lực trong vòng 5 phút, vui lòng sử dụng trước khi hết hạn</em>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Email sent successfully' });
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to send email' });
+  }
+});
+
+
+app.post('/api/register', async (req, res) => {
+  const { username, password, name, email, otp } = req.body;
+  
+  if (!otp) {
+      return res.status(400).json({ message: 'OTP is required' });
+  }
+
+  try {
+      const expiresAt = new Date();
+      const { data: otpData, error: otpError } = await db
+          .from('otps')
+          .select('*')
+          .eq('email', email)
+          .eq('username', username)
+          .eq('otp', otp)
+          .gt('expires_at', expiresAt.toISOString())
+          .single();
+
+      if (otpError) {
+          return res.status(500).json({ message: 'Mã OTP không hợp lệ hoặc đã hết hạn' });
+      }
+
+      if (!otpData) {
+          return res.status(400).json({ message: 'Mã OTP không hợp lệ hoặc đã hết hạn' });
+      }
+
+      await db.from('otps').delete().eq('id', otpData.id);
+
+      const token = generateToken();
+      const { data: accountData, error: accountError } = await db
+          .from('accounts')
+          .insert([{ username, password, name, email, token }])
+          .select();
+
+      if (accountError) {
+          return res.status(400).json({ message: 'Username was already taken', error: accountError.message });
+      }
+
+      res.status(200).json({ message: 'User registered successfully', data: accountData });
+  } catch (err) {
+      res.status(500).json({ error: err.message });
+  }
+});
+
 
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
@@ -467,7 +558,6 @@ app.post('/api/update-favorites', async (req, res) => {
     res.json({ message: 'Favorites updated successfully', favorited: updatedFavorites });
   } catch (error) {
     res.status(500).json({ message: error.message });
-    console.log(error)
   }
 });
 
@@ -526,7 +616,6 @@ app.post('/api/update-view', async (req, res) => {
     res.status(200).send({ success: true, data: data});
   } catch (err) {
     res.status(500).send({ success: false, error: err.message });
-    console.log(err)
   }
 });
 
@@ -543,7 +632,6 @@ app.post('/api/search', async (req, res) => {
     }
     res.json(data);
   } catch (error) {
-    console.error('Error fetching movies:', error);
     res.status(500).json({ error: error.message });
   }
 });

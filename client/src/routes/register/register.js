@@ -7,10 +7,13 @@ function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [OTP, setOTP] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isOTPSent, setIsOTPSent] = useState(false);
+  const [timer, setTimer] = useState(0); 
   const [inputErrors, setInputErrors] = useState({
     username: false,
     name: false,
@@ -24,37 +27,96 @@ function Register() {
     document.title = 'PhimHay - Đăng ký';
   }, []);
 
+  useEffect(() => {
+    if (timer > 0) {
+      const timeoutId = setTimeout(() => setTimer(timer - 1), 1000);
+      return () => clearTimeout(timeoutId);
+    } else {
+      setIsOTPSent(false); 
+    }
+  }, [timer]);
 
   const togglePasswordVisibility = () => {
     setShowPass(!showPass);
   };
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  const isValidEmail = (email) => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  };
 
-    const errors = {
-        username: !username,
-        name: !name,
-        email: !email,
-        password: !password,
-      };
-      setInputErrors(errors);
-
-    if (Object.values(errors).some((error) => error)) {
-    setPopupMessage('Vui lòng nhập đầy đủ thông tin');
-    setShowPopup(true);
-    setIsSuccess(false);
-    setTimeout(() => setShowPopup(false), 2000);
-    return;
+  const handleSendOTP = async () => {
+    if (!email) {
+      setPopupMessage('Vui lòng nhập email');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 2000);
+      return;
     }
 
-    const loginData = {
-      username: username,
-      password: password,
-      name: name,
-      email: email
-    };
+    if (!isValidEmail(email)) {
+      setPopupMessage('Vui lòng nhập đúng định dạng email');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 2000);
+      return;
+    }
 
+    try {
+      const response = await fetch(`${API_URL}/send-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, username }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setPopupMessage('OTP đã được gửi đến email của bạn');
+        setIsOTPSent(true);
+        setTimer(30);
+        setIsSuccess(true)
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 2000);
+      } else {
+        setPopupMessage('Gửi OTP thất bại');
+        setIsSuccess(false)
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 2000);
+      }
+    } catch (error) {
+      setPopupMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 2000);
+      console.error('Error:', error);
+    }
+  };
+  
+  const handleRegister = async (e) => {
+    e.preventDefault();
+  
+    const errors = {
+      username: !username,
+      name: !name,
+      email: !email || !isValidEmail(email),
+      password: !password,
+    };
+    setInputErrors(errors);
+  
+    if (Object.values(errors).some((error) => error)) {
+      setPopupMessage('Vui lòng nhập đầy đủ thông tin và kiểm tra định dạng email');
+      setShowPopup(true);
+      setIsSuccess(false);
+      setTimeout(() => setShowPopup(false), 2000);
+      return;
+    }
+  
+    const loginData = {
+      username,
+      password,
+      name,
+      email,
+      otp: OTP,
+    };
+  
     try {
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -64,30 +126,33 @@ function Register() {
         body: JSON.stringify(loginData),
       });
       const data = await response.json();
+  
       if (response.ok) {
-        console.log(data);
         setIsSuccess(true);
         setPopupMessage('Đăng ký thành công');
         setShowPopup(true);
         setTimeout(() => {
           setShowPopup(false);
           navigate('/dang-nhap');
-        }, 1000); 
+        }, 1000);
       } else {
-        setPopupMessage('Đăng ký thất bại, vui lòng chọn tên tài khoản khác');
+        if (data.message) {
+          setPopupMessage(data.message); 
+        } else {
+          setPopupMessage('Đăng ký thất bại, vui lòng thử lại sau.');
+        }
         setShowPopup(true);
         setIsSuccess(false);
         setTimeout(() => setShowPopup(false), 2000);
       }
     } catch (error) {
-        setPopupMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
-        setShowPopup(true);
-        setIsSuccess(false);
-        setTimeout(() => setShowPopup(false), 2000);
-        console.error('Error:', JSON.stringify(error));
+      setPopupMessage('Có lỗi xảy ra, vui lòng thử lại sau.');
+      setShowPopup(true);
+      setIsSuccess(false);
+      setTimeout(() => setShowPopup(false), 2000);
+      console.error('Error:', JSON.stringify(error));
     }
-  };
-
+  };  
 
   return (
     <div className="main">
@@ -165,6 +230,27 @@ function Register() {
                 </svg>
               )}
             </span>
+          </div>
+          <div className={`otp-container ${inputErrors.username ? 'error' : ''}`}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-asterisk" viewBox="0 0 16 16">
+            <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1"/>
+          </svg>
+            <input 
+                className="username" 
+                type="text" 
+                placeholder="Email OTP" 
+                value={OTP} 
+                onChange={(e) => setOTP(e.target.value)}
+                required
+            />
+            <button
+              onClick={handleSendOTP}
+              disabled={isOTPSent}
+              className={`sendOTP ${isOTPSent ? 'disabled' : ''}`}
+            >
+              {isOTPSent ? `Vui lòng đợi ${timer} giây` : "Lấy mã OTP"} 
+              {isOTPSent ? '' : <i className='bx bx-mail-send'></i>}
+            </button>
           </div>
 
           <div className='register'>
